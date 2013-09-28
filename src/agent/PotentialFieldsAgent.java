@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class PotentialFieldsAgent implements AgentInterface {
 	@Override
-	public List<Action> getAction(Environment environment) {
+	public List<Action> getActions(Environment environment) {
 		return null;  //To change body of implemented methods use File | Settings | File Templates.
 	}
 }

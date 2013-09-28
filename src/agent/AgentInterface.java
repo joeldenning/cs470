@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface AgentInterface {
 
-	public List<Action> getAction(Environment environment);
+	public List<Action> getActions(Environment environment);
 }
