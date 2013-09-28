@@ -19,7 +19,6 @@ public class Controller {
 	
 	private void goToGoal() {
 		Environment environment = communicator.getEnvironment();
-		
 	}
 
 	public Controller(String url, AgentInterface agent) {

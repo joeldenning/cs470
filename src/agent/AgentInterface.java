@@ -3,7 +3,9 @@ package agent;
 import environment.Action;
 import environment.Environment;
 
+import java.util.List;
+
 public interface AgentInterface {
 
-	public Action getAction(Environment environment);
+	public List<Action> getAction(Environment environment);
 }
