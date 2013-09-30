@@ -1,23 +1,58 @@
 package communicator;
 
 import environment.*;
+import java.net.*;
 
 import java.util.Scanner;
+
+String LIST_START = "begin";
+String LIST_END = "end";
+
 
 public class Communicator {
 
 	private String url;
+	Socket comSocket;
+    PrintWriter out;
+    BufferedReader in;
+    
 	
-	public Communicator(String url) {
+	public Communicator(String url, in socket) {
 		this.url = url;
+		connectToSocket(url,socket)
 	}
 
 	public void doAction(Action action) {
-		//To change body of created methods use File | Settings | File Templates.
+		//TODO
+	}
+	
+	private void connectToSocket(String host, int socket) {
+		try {
+            comSocket = new Socket(host, socket);
+            out = new PrintWriter(comSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(
+                                        comSocket.getInputStream()));
+        } catch (UnknownHostException e) {
+            System.err.println("Unknown host: " + host);
+        } catch (IOException e) {
+            System.err.println("Couldn't get I/O for the connection to: " + host);
+        }
 	}
 
-	private String writeToSocket(String command) {
-		return null;
+	private String writeToSocket(String command) throws IOException {
+		out.println(command);
+		String ack =  in.readLine();
+		if (!ack.startsWith("ack") || !ack.contains(command))
+			throw IOException;
+		String returned =  in.readLine();
+		if (returned.equals(LIST_START))
+		{
+			
+		}
+		else
+		{
+			return returned;
+		}
 	}
 
 	public Environment getEnvironment() {
