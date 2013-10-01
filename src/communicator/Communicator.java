@@ -17,13 +17,14 @@ public class Communicator {
     BufferedReader in;
     
 	
-	public Communicator(String url, in socket) {
+	public Communicator(String url, int socket) {
 		this.url = url;
 		connectToSocket(url,socket)
 	}
 
 	public void doAction(Action action) {
-		//TODO
+		String command = writeToSocket(action.toBZFlagString());
+		writeToSocket(command);
 	}
 	
 	private void connectToSocket(String host, int socket) {
@@ -39,20 +40,24 @@ public class Communicator {
         }
 	}
 
-	private String writeToSocket(String command) throws IOException {
+	private List<String> writeToSocket(String command) throws IOException {
+		List toReturn = new ArrayList();
 		out.println(command);
 		String ack =  in.readLine();
 		if (!ack.startsWith("ack") || !ack.contains(command))
 			throw IOException;
-		String returned =  in.readLine();
-		if (returned.equals(LIST_START))
-		{
-			
+		String response =  in.readLine();
+		if (response.equals(LIST_START)) {
+			response = in.readLine();
+			while (!response.equals(LIST_END)) {
+				toReturn.add()
+				response = in.readLine();
+			}
 		}
-		else
-		{
-			return returned;
+		else {
+			toReturn.add(response);
 		}
+		return toReturn;
 	}
 
 	public Environment getEnvironment() {
