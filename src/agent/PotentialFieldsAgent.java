@@ -4,7 +4,9 @@ import environment.Action;
 import environment.AttemptedAction;
 import environment.Environment;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,4 +30,9 @@ public class PotentialFieldsAgent extends AbstractAgent {
     public void processAttemptedActions(List<AttemptedAction> attemptedActions) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
+
+	@Override
+	public Map<Environment.Component, Collection<String>> desiredEnvironment() {
+		return null;  //To change body of implemented methods use File | Settings | File Templates.
+	}
 }

@@ -1,10 +1,13 @@
 package communicator;
 
+import agent.AbstractAgent;
 import environment.*;
 
 import java.io.*;
 import java.net.*;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -79,22 +82,34 @@ public class Communicator {
         }
     }
 
-	public Environment getEnvironment() {
+	public Environment getEnvironment(AbstractAgent agent) {
 		Environment environment = new Environment(color);
 
-//		loadTeams(environment);
-//		loadObstacles(environment);
-//		loadBases(environment);
-//		loadFlags(environment);
-//		loadMyTanks(environment);
-//		loadOtherTanks(environment);
-//		loadConstants(environment);
-//		loadOccupancyGrid(environment);
+		Map<Environment.Component, Collection<String>> desiredEnvironment = agent.desiredEnvironment();
+		if( desiredEnvironment.containsKey(Environment.Component.OTHER_TEAMS) )
+			loadTeams(environment);
+		if( desiredEnvironment.containsKey(Environment.Component.OBSTACLES) )
+			loadObstacles(environment);
+		if( desiredEnvironment.containsKey(Environment.Component.BASES) )
+			loadBases(environment);
+		if( desiredEnvironment.containsKey(Environment.Component.FLAGS) )
+			loadFlags(environment);
+		if( desiredEnvironment.containsKey(Environment.Component.MYTEAM) )
+			loadMyTanks(environment);
+		if( desiredEnvironment.containsKey(Environment.Component.OTHER_TANKS) )
+			loadOtherTanks(environment);
+		if( desiredEnvironment.containsKey(Environment.Component.CONSTANTS) )
+			loadConstants(environment);
+		if (desiredEnvironment.containsKey(Environment.Component.OCCUPANCY_GRID)) {
+			for( String tankNumber : desiredEnvironment.get(Environment.Component.OCCUPANCY_GRID) ) {
+				loadOccupancyGrid(environment, tankNumber);
+			}
+		}
 
 		return environment;
 	}
 
-	private void loadOccupancyGrid(Environment environment) {
+	private void loadOccupancyGrid(Environment environment, String tankNumber) {
 		/*
 			at 20,20
 			size 5x4
@@ -104,38 +119,36 @@ public class Communicator {
 			0001
 			0100
 		 */
-		for( int index=0; index<environment.getMyTeam().getPlayerCount(); index++ ) {
-            Scanner scan = null;
-            String response;
-            try {
-                response = writeToSocketSilent("occgrid " + index);
-                scan = new Scanner(response);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-			    return;
-            }
-            while( scan.hasNext() ) {
-				scan.next(); //skip the word at
-				String dim = scan.next();
-                String[] dimArr = dim.split(",");
-                int originX = Integer.parseInt(dimArr[0]);
-                int originY = Integer.parseInt(dimArr[1]);
-				scan.next(); //skip the word size
-				String size = scan.next();
-                String[] sizeArr = size.split("x");
-                int sizeX = Integer.parseInt(sizeArr[0]);
-                int sizeY = Integer.parseInt(sizeArr[1]);
-                scan.nextLine();
-                for (int x = 0; x < sizeX; x++) {
-                    String line = scan.nextLine();
-                    for (int y = 0; y < sizeY; y++) {
-                        char occupied = line.charAt(y);
-                        environment.getOccupancyGrid().setOccupied(originX + x, originY + y, occupied != '0');
-                    }
-                }
-            }
-            scan.close();
-        }
+		Scanner scan = null;
+		String response;
+		try {
+			response = writeToSocketSilent("occgrid " + tankNumber);
+			scan = new Scanner(response);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return;
+		}
+		while (scan.hasNext()) {
+			scan.next(); //skip the word at
+			String dim = scan.next();
+			String[] dimArr = dim.split(",");
+			int originX = Integer.parseInt(dimArr[0]);
+			int originY = Integer.parseInt(dimArr[1]);
+			scan.next(); //skip the word size
+			String size = scan.next();
+			String[] sizeArr = size.split("x");
+			int sizeX = Integer.parseInt(sizeArr[0]);
+			int sizeY = Integer.parseInt(sizeArr[1]);
+			scan.nextLine();
+			for (int x = 0; x < sizeX; x++) {
+				String line = scan.nextLine();
+				for (int y = 0; y < sizeY; y++) {
+					char occupied = line.charAt(y);
+					environment.getOccupancyGrid().setOccupied(originX + x, originY + y, occupied != '0');
+				}
+			}
+			scan.close();
+		}
 	}
 
 	private void loadConstants(Environment environment) {

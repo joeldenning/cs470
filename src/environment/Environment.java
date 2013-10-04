@@ -79,4 +79,8 @@ public class Environment {
 	public OccupancyGrid getOccupancyGrid() {
 		return occupancyGrid;
 	}
+
+	public static enum Component {
+		OBSTACLES, BASES, FLAGS, OCCUPANCY_GRID, SHOT, MYTEAM, OTHER_TANKS, CONSTANTS, OTHER_TEAMS
+	}
 }

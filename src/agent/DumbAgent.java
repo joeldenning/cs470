@@ -4,9 +4,7 @@ import environment.AttemptedAction;
 import environment.Action;
 import environment.Environment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class DumbAgent extends AbstractAgent {
 
@@ -76,7 +74,12 @@ public class DumbAgent extends AbstractAgent {
         }
     }
 
-    private void slowingRotation() {
+	@Override
+	public Map<Environment.Component, Collection<String>> desiredEnvironment() {
+		return new HashMap<Environment.Component, Collection<String>>();
+	}
+
+	private void slowingRotation() {
         state = State.MOVING_FORWARD;
         nextStateChange = System.currentTimeMillis() + 3000l + random.nextLong() % 5000;
     }
