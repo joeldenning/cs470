@@ -3,14 +3,12 @@ package environment;
 public class Flag {
 
 	private String possessingColor;
-	private double x, y, vx, vy;
+	private double x, y;
 
-	public Flag(String possessingColor, double x, double y, double vx, double vy) {
+	public Flag(String possessingColor, double x, double y) {
 		this.possessingColor = possessingColor;
 		this.x = x;
 		this.y = y;
-		this.vx = x;
-		this.vy = y;
 	}
 
 	public String getPossessingColor() {
@@ -35,21 +33,5 @@ public class Flag {
 
 	public void setY(double y) {
 		this.y = y;
-	}
-
-	public double getVx() {
-		return vx;
-	}
-
-	public void setVx(double vx) {
-		this.vx = vx;
-	}
-
-	public double getVy() {
-		return vy;
-	}
-
-	public void setVy(double vy) {
-		this.vy = vy;
 	}
 }

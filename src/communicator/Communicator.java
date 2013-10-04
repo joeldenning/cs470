@@ -1,29 +1,35 @@
 package communicator;
 
 import environment.*;
+
+import java.io.*;
 import java.net.*;
 
 import java.util.Scanner;
 
-String LIST_START = "begin";
-String LIST_END = "end";
-
 
 public class Communicator {
 
-	private String url;
-	Socket comSocket;
+    private String color;
+    String LIST_START = "begin";
+    String LIST_END = "end";
+    Socket comSocket;
     PrintWriter out;
     BufferedReader in;
-    
 	
-	public Communicator(String url, in socket) {
-		this.url = url;
-		connectToSocket(url,socket)
+	public Communicator(String url, int socket, String color) {
+		connectToSocket(url,socket);
+        this.color = color;
 	}
 
-	public void doAction(Action action) {
-		//TODO
+	public boolean actionSucceeds(Action action) {
+		try {
+            writeToSocket(action.toBZFlagString(), true);
+            return true;
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
 	}
 	
 	private void connectToSocket(String host, int socket) {
@@ -39,33 +45,51 @@ public class Communicator {
         }
 	}
 
-	private String writeToSocket(String command) throws IOException {
-		out.println(command);
-		String ack =  in.readLine();
-		if (!ack.startsWith("ack") || !ack.contains(command))
-			throw IOException;
-		String returned =  in.readLine();
-		if (returned.equals(LIST_START))
-		{
-			
-		}
-		else
-		{
-			return returned;
-		}
-	}
+    /**
+     * Write to socket without logging
+     * @param command
+     * @return
+     * @throws IOException
+     */
+    public String writeToSocketSilent(String command) throws IOException {
+        return writeToSocket(command, false);
+    }
+
+	public synchronized String writeToSocket(String command, boolean verbose) throws IOException {
+        if( verbose )
+            System.out.println(command);
+        out.println(command);
+        String ack = in.readLine();
+        if (!ack.startsWith("ack"))
+            throw new IOException("Failed command '" + command + "' with error '" + ack + "'");
+        if( verbose )
+            System.out.println("\t"+ack);
+        String returned = in.readLine();
+        if (returned.equals(LIST_START)) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null && !line.equals(LIST_END)) {
+                sb.append(line + "\n");
+                if( verbose )
+                    System.out.println("\t"+line);
+            }
+            return sb.toString();
+        } else {
+            return returned;
+        }
+    }
 
 	public Environment getEnvironment() {
-		Environment environment = new Environment();
+		Environment environment = new Environment(color);
 
-		loadTeams(environment);
-		loadObstacles(environment);
-		loadBases(environment);
-		loadFlags(environment);
-		loadMyTanks(environment);
-		loadOtherTanks(environment);
-		loadConstants(environment);
-		loadOccupancyGrid(environment);
+//		loadTeams(environment);
+//		loadObstacles(environment);
+//		loadBases(environment);
+//		loadFlags(environment);
+//		loadMyTanks(environment);
+//		loadOtherTanks(environment);
+//		loadConstants(environment);
+//		loadOccupancyGrid(environment);
 
 		return environment;
 	}
@@ -81,39 +105,64 @@ public class Communicator {
 			0100
 		 */
 		for( int index=0; index<environment.getMyTeam().getPlayerCount(); index++ ) {
-			Scanner scan = new Scanner(writeToSocket("occgrid "+index));
-			while( scan.hasNext() ) {
+            Scanner scan = null;
+            String response;
+            try {
+                response = writeToSocketSilent("occgrid " + index);
+                scan = new Scanner(response);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+			    return;
+            }
+            while( scan.hasNext() ) {
 				scan.next(); //skip the word at
-				int originX = scan.nextInt();
-				scan.next(); //skip the comma
-				int originY = scan.nextInt();
+				String dim = scan.next();
+                String[] dimArr = dim.split(",");
+                int originX = Integer.parseInt(dimArr[0]);
+                int originY = Integer.parseInt(dimArr[1]);
 				scan.next(); //skip the word size
-				int sizeX = scan.nextInt();
-				scan.nextByte(); //skip the x
-				int sizeY = scan.nextInt();
-				for( int x=0; x<sizeX; x++ ) {
-					for( int y=0; y<sizeY; y++ ) {
-						environment.getOccupancyGrid().setOccupied(x, y, scan.nextBoolean());
-					}
-				}
-			}
-			scan.close();
-		}
+				String size = scan.next();
+                String[] sizeArr = size.split("x");
+                int sizeX = Integer.parseInt(sizeArr[0]);
+                int sizeY = Integer.parseInt(sizeArr[1]);
+                scan.nextLine();
+                for (int x = 0; x < sizeX; x++) {
+                    String line = scan.nextLine();
+                    for (int y = 0; y < sizeY; y++) {
+                        char occupied = line.charAt(y);
+                        environment.getOccupancyGrid().setOccupied(originX + x, originY + y, occupied != '0');
+                    }
+                }
+            }
+            scan.close();
+        }
 	}
 
 	private void loadConstants(Environment environment) {
-		Scanner scan = new Scanner(writeToSocket("constants"));
-		while( scan.hasNext() ) {
+        Scanner scan = null;
+        try {
+            scan = new Scanner(writeToSocketSilent("constants"));
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        while( scan.hasNext() ) {
 			scan.next(); //skip the word constants
-			environment.putConstant(scan.next(), scan.nextBoolean());
+			environment.putConstant(scan.next(), scan.next());
 		}
 		scan.close();
 	}
 
 	private void loadOtherTanks(Environment environment) {
 		//othertank [callsign] [color] [status] [flag] [x] [y] [angle]
-		Scanner scan = new Scanner(writeToSocket("othertanks"));
-		while( scan.hasNext() ) {
+        Scanner scan = null;
+        try {
+            scan = new Scanner(writeToSocketSilent("othertanks"));
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        while( scan.hasNext() ) {
 			scan.next(); //skip the word othertank
 			Tank tank = new Tank();
 			tank.setCallSign(scan.next());
@@ -123,14 +172,22 @@ public class Communicator {
 			tank.setX(scan.nextDouble());
 			tank.setAngle(scan.nextDouble());
 			environment.getTeam(color).addTank(tank);
+            //unknown value
+            scan.next();
 		}
 		scan.close();
 	}
 
 	private void loadMyTanks(Environment environment) {
 //		mytank [index] [callsign] [status] [shots available] [time to reload] [flag] [x] [y] [angle] [vx] [vy] [angvel]
-		String myTanks = writeToSocket("mytanks");
-		Scanner scan = new Scanner(myTanks);
+        String myTanks = null;
+        try {
+            myTanks = writeToSocketSilent("mytanks");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        Scanner scan = new Scanner(myTanks);
 		while( scan.hasNext() ) {
 			scan.next(); //skip the word my tank
 			Tank tank = new Tank();
@@ -152,15 +209,19 @@ public class Communicator {
 	}
 
 	private void loadFlags(Environment environment) {
-		String flags = writeToSocket("flags");
-		Scanner scan = new Scanner(flags);
+        String flags = null;
+        try {
+            flags = writeToSocketSilent("flags");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        Scanner scan = new Scanner(flags);
 		while( scan.hasNext() ) {
 			scan.next(); //skip the word flag
 			String color = scan.next();
 			String possessingColor = scan.next();
 			Flag flag = new Flag(possessingColor,
-					scan.nextDouble(),
-					scan.nextDouble(),
 					scan.nextDouble(),
 					scan.nextDouble());
 			environment.getTeam(color).setFlag(flag);
@@ -169,40 +230,67 @@ public class Communicator {
 	}
 
 	private void loadBases(Environment environment) {
-		String bases = writeToSocket("bases");
-		Scanner scan = new Scanner(bases);
+        String bases = null;
+        try {
+            bases = writeToSocketSilent("bases");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        Scanner scan = new Scanner(bases);
 		while( scan.hasNext() ) {
 			scan.next(); //skip the word base
 			String color = scan.next();
 			Team team = environment.getTeam(color);
 			team.setBase(new Base(
-					Double.parseDouble(scan.next()),
-					Double.parseDouble(scan.next()),
-					Double.parseDouble(scan.next()),
-					Double.parseDouble(scan.next())
-			));
+                    scan.nextDouble(),
+                    scan.nextDouble(),
+                    scan.nextDouble(),
+                    scan.nextDouble()));
+            //unknown next four doubles
+            scan.nextDouble();
+            scan.nextDouble();
+            scan.nextDouble();
+            scan.nextDouble();
 		}
 		scan.close();
 	}
 
 	private void loadObstacles(Environment environment) {
-		String obstacles = writeToSocket("obstacles");
-		Scanner scan = new Scanner(obstacles);
+        String obstacles = null;
+        try {
+            obstacles = writeToSocketSilent("obstacles");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        Scanner scan = new Scanner(obstacles);
 		while( scan.hasNext() ) {
 			scan.next(); //skip the word obstacle
 			environment.addObstacle(
 					new Obstacle(
-							Double.parseDouble(scan.next()),
-							Double.parseDouble(scan.next()),
-							Double.parseDouble(scan.next()),
-							Double.parseDouble(scan.next())));
+							scan.nextDouble(),
+                            scan.nextDouble(),
+                            scan.nextDouble(),
+                            scan.nextDouble()));
+            //unknown next four doubles
+            scan.nextDouble();
+            scan.nextDouble();
+            scan.nextDouble();
+            scan.nextDouble();
 		}
 		scan.close();
 	}
 
 	private void loadTeams(Environment environment) {
-		String teams = writeToSocket("teams");
-		Scanner scan = new Scanner(teams);
+        String teams = null;
+        try {
+            teams = writeToSocketSilent("teams");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+			return;
+        }
+        Scanner scan = new Scanner(teams);
 		while( scan.hasNext() ) {
 			scan.next(); //skip the word team
 			Team team = new Team();
@@ -214,4 +302,7 @@ public class Communicator {
 		scan.close();
 	}
 
+    public void writeToSocketNoExpectedResponse(String command) {
+        out.println(command);
+    }
 }

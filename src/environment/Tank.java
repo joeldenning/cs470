@@ -112,6 +112,6 @@ public class Tank {
 	}
 
 	private enum Status {
-
+        alive, dead
 	}
 }

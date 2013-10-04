@@ -9,10 +9,14 @@ public class Environment {
 	private List<Obstacle> obstacles = new ArrayList<Obstacle>();
 	private List<Shot> shots = new ArrayList<Shot>();
 	private String myTeamColor;
-	private Map<String, Boolean> constants = new HashMap<String, Boolean>();
+	private Map<String, String> constants = new HashMap<String, String>();
 	private OccupancyGrid occupancyGrid = new OccupancyGrid();
 
-	public Tank getMyState() {
+    public Environment(String color) {
+        this.myTeamColor = color;
+    }
+
+    public Tank getMyState() {
 		return myState;
 	}
 
@@ -64,11 +68,11 @@ public class Environment {
 		return teams.get(myTeamColor);
 	}
 
-	public void putConstant(String key, boolean value) {
+	public void putConstant(String key, String value) {
 		constants.put(key, value);
 	}
 
-	public boolean getConstant(String key) {
+	public String getConstant(String key) {
 		return constants.get(key);
 	}
 

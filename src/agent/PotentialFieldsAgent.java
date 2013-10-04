@@ -1,6 +1,7 @@
 package agent;
 
 import environment.Action;
+import environment.AttemptedAction;
 import environment.Environment;
 
 import java.util.List;
@@ -12,9 +13,19 @@ import java.util.List;
  * Time: 2:28 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PotentialFieldsAgent implements AgentInterface {
-	@Override
-	public List<Action> getActions(Environment environment) {
-		return null;  //To change body of implemented methods use File | Settings | File Templates.
-	}
+public class PotentialFieldsAgent extends AbstractAgent {
+
+    public PotentialFieldsAgent(int tankIndex) {
+        super(tankIndex);
+    }
+
+    @Override
+    public List<Action> getActions(Environment environment) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void processAttemptedActions(List<AttemptedAction> attemptedActions) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }
