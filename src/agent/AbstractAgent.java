@@ -24,7 +24,7 @@ public abstract class AbstractAgent {
 
 	/**
 	 * @return a map from desired component to the parameters to pass to the server. If a desired component does not
-	 * require additional components, then any value (including null) is okay for the Collection<String>
+	 * require any parameters, then any value (including null) is okay for the Collection<String>
 	 */
 	public abstract Map<Environment.Component, Collection<String>> desiredEnvironment();
 
