@@ -54,13 +54,13 @@ public class Communicator {
     }
 
 	public synchronized String writeToSocket(String command, boolean verbose) throws IOException {
-        if( verbose )
+//        if( verbose )
             System.out.println(command);
         out.println(command);
         String ack = in.readLine();
         if (!ack.startsWith("ack"))
             throw new IOException("Failed command '" + command + "' with error '" + ack + "'");
-        if( verbose )
+//        if( verbose )
             System.out.println("\t"+ack);
         String returned = in.readLine();
         if (returned.equals(LIST_START)) {
@@ -68,7 +68,7 @@ public class Communicator {
             String line;
             while ((line = in.readLine()) != null && !line.equals(LIST_END)) {
                 sb.append(line + "\n");
-                if( verbose )
+//                if( verbose )
                     System.out.println("\t"+line);
             }
             return sb.toString();
@@ -89,9 +89,8 @@ public class Communicator {
 			loadBases(environment);
 		if( desiredEnvironment.containsKey(Environment.Component.FLAGS) )
 			loadFlags(environment);
-		if( desiredEnvironment.containsKey(Environment.Component.MYTEAM) )
-			loadMyTanks(environment);
-		if( desiredEnvironment.containsKey(Environment.Component.OTHER_TANKS) )
+        loadMyTanks(environment);
+        if (desiredEnvironment.containsKey(Environment.Component.OTHER_TANKS) )
 			loadOtherTanks(environment);
 		if( desiredEnvironment.containsKey(Environment.Component.CONSTANTS) )
 			loadConstants(environment);

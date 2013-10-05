@@ -6,6 +6,7 @@ import environment.AttemptedAction;
 import communicator.Communicator;
 import environment.Action;
 import environment.Environment;
+import environment.Tank;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -44,8 +45,7 @@ public class Controller extends Thread {
         }
     }
 
-	private void goToGoal() {
-		Environment environment = communicator.getEnvironment();
+	private void goToGoal(Environment environment) {
 		List<Action> actions = agent.getActions(environment);
         List<AttemptedAction> resultsOfActions = new ArrayList<AttemptedAction>();
 		for( Action action : actions ) {
@@ -60,7 +60,12 @@ public class Controller extends Thread {
     @Override
     public void run() {
         while(true) {
-            goToGoal();
+            Environment environment = communicator.getEnvironment(agent);
+            if( environment.getMyState().getStatus() == Tank.Status.alive )
+                goToGoal(environment);
+            else
+                break;
         }
     }
+
 }
