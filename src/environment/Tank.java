@@ -111,7 +111,7 @@ public class Tank {
 		return angularVelocity;
 	}
 
-	private enum Status {
+	public static enum Status {
         alive, dead
 	}
 }
