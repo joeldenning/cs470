@@ -1,14 +1,32 @@
 package environment;
 
+import agent.AbstractAgent;
+
 public class Action {
 
-	private Type type;
-	
-	public String toBZFlagString() {
-		return null;
+	protected Type type;
+    protected String value;
+    protected AbstractAgent agent;
+
+    public Action(AbstractAgent agent, Type type, String value) {
+        this.type = type;
+        this.value = value;
+        this.agent = agent;
+    }
+
+    public String toBZFlagString() {
+		return type.toString().toLowerCase()+" "+agent.getTankNumber()+" "+value;
 	}
-	
-	private enum Type {
-		SHOOT, SPEED, ANG_VEL
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public static enum Type {
+		SHOOT, SPEED, ANGVEL
 	}
 }
