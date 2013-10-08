@@ -8,46 +8,43 @@ package agent.potentialfields;
  * To change this template use File | Settings | File Templates.
  */
 public class TankVector {
-    private double vx, vy;
+    private double desiredSpeed, desiredAngularVelocity;
 
-    public TankVector(double vx, double vy) {
-        this.vx = vx;
-        this.vy = vy;
+    public TankVector(double desiredSpeed, double desiredAngularVelocity) {
+        this.desiredSpeed = desiredSpeed;
+        this.desiredAngularVelocity = desiredAngularVelocity;
     }
 
-    public static TankVector createVector(double angle, double magnitude) {
-        //TODO Joel
-        return null;
+//    public static TankVector createVector(double angle, double magnitude) {
+//        return new TankVector(magnitude*Math.sin(angle), magnitude*Math.cos(angle));
+//    }
+
+    public double getDesiredSpeed() {
+        return desiredSpeed;
     }
 
-    public double getVx() {
-        return vx;
+    public void setDesiredSpeed(double desiredSpeed) {
+        this.desiredSpeed = desiredSpeed;
     }
 
-    public void setVx(double vx) {
-        this.vx = vx;
+    public double getDesiredAngularVelocity() {
+        return desiredAngularVelocity;
     }
 
-    public double getVy() {
-        return vy;
+    public void setDesiredAngularVelocity(double desiredAngularVelocity) {
+        this.desiredAngularVelocity = desiredAngularVelocity;
     }
 
-    public void setVy(double vy) {
-        this.vy = vy;
-    }
-
-    public double getMagnitude() {
-        //TODO conversion Joel
-        return 0d;
-    }
-
-    public double getAngle() {
-        //TODO conversion Joel
-        return 0d;
-    }
+//    public double getMagnitude() {
+//        return Math.sqrt(Math.pow(desiredSpeed, 2d) * Math.pow(desiredAngularVelocity, 2d));
+//    }
+//
+//    public double getAngle() {
+//        return Math.atan(desiredAngularVelocity / desiredSpeed);
+//    }
 
     public void add(TankVector tankVector) {
-        this.vx += tankVector.vx;
-        this.vy += tankVector.vy;
+        this.desiredSpeed += tankVector.desiredSpeed;
+        this.desiredAngularVelocity += tankVector.desiredAngularVelocity;
     }
 }

@@ -37,12 +37,11 @@ public class PotentialFieldsAgent extends AbstractAgent {
     public PotentialFieldsAgent(int tankIndex) {
         super(tankIndex);
         state = State.PURSUING;
-        pdController = new PDController();
+        pdController = new PDController(this);
     }
 
     @Override
     public List<Action> getActions(Environment environment) {
-
         findState(environment);
 
         List<PotentialField> potentialFields = generatePotentialFields(environment);
@@ -52,7 +51,6 @@ public class PotentialFieldsAgent extends AbstractAgent {
 
         lastTimeActionsPerformed = System.currentTimeMillis();
         return actions;
-
     }
 
     private TankVector sum(List<PotentialField> potentialFields) {
