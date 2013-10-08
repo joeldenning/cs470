@@ -5,10 +5,12 @@ import environment.*;
 
 import java.io.*;
 import java.net.*;
-
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.awt.geom.Point2D;
 
 
 public class Communicator {
@@ -249,7 +251,15 @@ public class Communicator {
 			scan.next(); //skip the word base
 			String color = scan.next();
 			Team team = environment.getTeam(color);
-			team.setBase(new Base(
+			
+			List<Point2D.Double> corners = new ArrayList<Point2D.Double>();
+			//I'm just going to assume bases always have four corners.
+			for (int i = 0; i < 4; i++) {
+				corners.add(new Point2D.Double(scan.nextDouble(),scan.nextDouble()));
+			}
+			
+			team.setBase(new Base(corners));
+			/*team.setBase(new Base(
                     scan.nextDouble(),
                     scan.nextDouble(),
                     scan.nextDouble(),
@@ -258,7 +268,7 @@ public class Communicator {
             scan.nextDouble();
             scan.nextDouble();
             scan.nextDouble();
-            scan.nextDouble();
+            scan.nextDouble();*/
 		}
 		scan.close();
 	}

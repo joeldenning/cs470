@@ -13,13 +13,33 @@ import environment.Tank;
  */
 public class AttractiveField extends PotentialField {
 
+	private double radius;
+	private double goalX;
+	private double goalY;
+	
     public AttractiveField(Flag flag, Tank myself) {
         super(myself);
-
+        radius = 1;
+        goalX = flag.getX();
+        goalY = flag.getY();
     }
 
     public AttractiveField(Base base, Tank myself) {
         super(myself);
+        
+        //Find average of corners for center location
+        int numOfCorners = base.getNumOfCorners();
+        goalX = 0;
+        goalY = 0;
+        for (int i = 0; i < numOfCorners; i++) {
+        	goalX += base.getCorner(i).x;
+        	goalY += base.getCorner(i).y;
+        }
+        goalX = goalX/numOfCorners;
+        goalY = goalY/numOfCorners;
+        
+        //Rough estimate on radius
+        
     }
 
     @Override

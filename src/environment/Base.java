@@ -1,16 +1,28 @@
 package environment;
 
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.lang.IndexOutOfBoundsException;
+
 public class Base {
-	private double x1, x2, y1, y2;
-
-	public Base(double x1, double x2, double y1, double y2) {
-		this.x1 = x1;
-		this.x2 = x2;
-		this.y1 = y1;
-		this.y2 = y2;
+	private List<Point2D.Double> corners;
+	
+	public Base(List<Point2D.Double> corners) {
+		this.corners = new ArrayList(corners);
 	}
-
-	public double getX1() {
+	
+	public int getNumOfCorners() {
+		return corners.size();
+	}
+	
+	public Point2D.Double getCorner(int i) {
+		if (i < corners.size() && i >= 0) {
+			return corners.get(i);
+		}
+		throw new IndexOutOfBoundsException();
+	}
+	/*public double getX1() {
 		return x1;
 	}
 
@@ -40,5 +52,5 @@ public class Base {
 
 	public void setY2(double y2) {
 		this.y2 = y2;
-	}
+	}*/
 }
