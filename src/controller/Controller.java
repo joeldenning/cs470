@@ -2,6 +2,7 @@ package controller;
 
 import agent.AbstractAgent;
 import agent.DumbAgent;
+import agent.PotentialFieldsAgent;
 import environment.AttemptedAction;
 import communicator.Communicator;
 import environment.Action;
@@ -22,7 +23,7 @@ public class Controller extends Thread {
         communicator = new Communicator(args[0], Integer.parseInt(args[1]), args[2]);
         init();
         for( int i=0; i<numOfAgents; i++ ) {
-            Controller controller = new Controller(new DumbAgent(i));
+            Controller controller = new Controller(new PotentialFieldsAgent(i));
             controller.start();
         }
 	}

@@ -33,10 +33,12 @@ public class PotentialFieldsAgent extends AbstractAgent {
     private static Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
 
     static {
+        //my state and my team are automatically added
         desiredEnvironment.put(Environment.Component.FLAGS, null);
         desiredEnvironment.put(Environment.Component.OBSTACLES, null);
         desiredEnvironment.put(Environment.Component.BASES, null);
         desiredEnvironment.put(Environment.Component.OTHER_TANKS, null);
+        desiredEnvironment.put(Environment.Component.OTHER_TEAMS, null);
     }
 
     private State state;

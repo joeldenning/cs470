@@ -99,7 +99,7 @@ public class Communicator {
 			loadBases(environment);
 		if( desiredEnvironment.containsKey(Environment.Component.FLAGS) )
 			loadFlags(environment);
-        loadMyTanks(environment);
+        loadMyTanks(environment, agent);
         if (desiredEnvironment.containsKey(Environment.Component.OTHER_TANKS) )
 			loadOtherTanks(environment);
 		if( desiredEnvironment.containsKey(Environment.Component.CONSTANTS) )
@@ -195,7 +195,7 @@ public class Communicator {
 		scan.close();
 	}
 
-	private void loadMyTanks(Environment environment) {
+	private void loadMyTanks(Environment environment, AbstractAgent agent) {
 //		mytank [index] [callsign] [status] [shots available] [time to reload] [flag] [x] [y] [angle] [vx] [vy] [angvel]
         String myTanks = null;
         try {
@@ -222,6 +222,7 @@ public class Communicator {
 			tank.setAngularVelocity(scan.nextDouble());
 			environment.getMyTeam().addTank(tank);
 		}
+        environment.setMyState(environment.getMyTeam().getTanks().get(agent.getTankNumber()));
 		scan.close();
 	}
 

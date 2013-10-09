@@ -32,7 +32,17 @@ public class TankVector {
     }
 
     public void add(TankVector tankVector) {
+        double x = this.getXVector() + tankVector.getXVector();
+        double y = this.getYVector() + tankVector.getYVector();
         this.magnitude += tankVector.magnitude;
         this.angle += tankVector.angle;
+    }
+
+    public double getXVector() {
+        return 0;
+    }
+
+    public double getYVector() {
+        return 0;
     }
 }
