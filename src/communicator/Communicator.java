@@ -234,6 +234,7 @@ public class Communicator {
 					scan.nextDouble(),
 					scan.nextDouble());
 			environment.getTeam(color).setFlag(flag);
+			environment.addFlag(flag);
 		}
 		scan.close();
 	}

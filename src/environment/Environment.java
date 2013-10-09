@@ -11,6 +11,7 @@ public class Environment {
 	private String myTeamColor;
 	private Map<String, String> constants = new HashMap<String, String>();
 	private OccupancyGrid occupancyGrid = new OccupancyGrid();
+	private List<Flag> flags = new ArrayList<Flag>();
 
     public Environment(String color) {
         this.myTeamColor = color;
@@ -78,6 +79,18 @@ public class Environment {
 
 	public OccupancyGrid getOccupancyGrid() {
 		return occupancyGrid;
+	}
+
+	public List<Flag> getFlags() {
+		return flags;
+	}
+
+	public void setFlags(List<Flag> flags) {
+		this.flags = flags;
+	}
+	
+	public void addFlag(Flag flag) {
+		flags.add(flag);
 	}
 
 	public static enum Component {

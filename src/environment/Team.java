@@ -37,4 +37,8 @@ public class Team {
 	public void addTank(Tank tank) {
 		this.tanks.add(tank);
 	}
+	
+	public List<Tank> getTanks() {
+		return new ArrayList<Tank>(tanks);
+	}
 }

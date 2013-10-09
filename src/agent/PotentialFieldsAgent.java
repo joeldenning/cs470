@@ -1,12 +1,20 @@
 package agent;
 
 import agent.pdcontroller.PDController;
+import agent.potentialfields.AttractiveField;
 import agent.potentialfields.PotentialField;
+import agent.potentialfields.RepulsiveField;
 import agent.potentialfields.TankVector;
 import environment.Action;
 import environment.AttemptedAction;
+import environment.Base;
 import environment.Environment;
+import environment.Flag;
+import environment.Obstacle;
+import environment.Tank;
+import environment.Team;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -62,17 +70,45 @@ public class PotentialFieldsAgent extends AbstractAgent {
 
     private List<PotentialField> generatePotentialFields(Environment environment) {
         //TODO Brian - find the closest flag and create an attractive field
-
+    	List<PotentialField> fields = new ArrayList<PotentialField>();
         if( state == State.PURSUING ) {
-//            String colorOfClosestFlag = findColorOfClosestFlag(environment);
+            Flag closestFlag = findColorOfClosestFlag(environment);
+            fields.add(new AttractiveField(closestFlag, environment.getMyState()));
         } else {
-            //state == RETURNING
+            Base mybase = environment.getMyTeam().getBase();
+            fields.add(new AttractiveField(mybase,environment.getMyState()));
         }
-
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        
+        for (Obstacle ob : environment.getObstacles()) {
+        	fields.add(new RepulsiveField(ob,environment.getMyState()));
+        	//TODO tangent
+        }
+        
+        for (Team team : environment.getTeams()) {
+        	for (Tank tank : team.getTanks()) {
+        		fields.add(new RepulsiveField(tank,environment.getMyState()));
+        	}
+        }
+        
+        return fields;
     }
 
-    @Override
+    private Flag findColorOfClosestFlag(Environment environment) {
+    	double closestDistance = Double.MAX_VALUE;
+    	Flag closestFlag = null;
+    	double myX = environment.getMyState().getX();
+    	double myY = environment.getMyState().getY();
+		for (Flag flag : environment.getFlags()) {
+			double distance = Math.sqrt(Math.pow(flag.getX()-myX, 2) + Math.pow(flag.getY()-myY, 2));
+			if (closestDistance > distance) {
+				closestDistance = distance;
+				closestFlag = flag;
+			}
+		}
+		return closestFlag;
+	}
+
+	@Override
     public void processAttemptedActions(List<AttemptedAction> attemptedActions) {}
 
 	@Override
