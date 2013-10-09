@@ -8,43 +8,43 @@ package agent.potentialfields;
  * To change this template use File | Settings | File Templates.
  */
 public class TankVector {
-    private double desiredSpeed, desiredAngularVelocity;
+    private double magnitude, angle;
 
-    public TankVector(double desiredSpeed, double desiredAngularVelocity) {
-        this.desiredSpeed = desiredSpeed;
-        this.desiredAngularVelocity = desiredAngularVelocity;
+    public TankVector(double magnitude, double angle) {
+        this.magnitude = magnitude;
+        this.angle = angle;
     }
 
 //    public static TankVector createVector(double angle, double magnitude) {
 //        return new TankVector(magnitude*Math.sin(angle), magnitude*Math.cos(angle));
 //    }
 
-    public double getDesiredSpeed() {
-        return desiredSpeed;
+    public double getMagnitude() {
+        return magnitude;
     }
 
-    public void setDesiredSpeed(double desiredSpeed) {
-        this.desiredSpeed = desiredSpeed;
+    public void setMagnitude(double magnitude) {
+        this.magnitude = magnitude;
     }
 
-    public double getDesiredAngularVelocity() {
-        return desiredAngularVelocity;
+    public double getAngle() {
+        return angle;
     }
 
-    public void setDesiredAngularVelocity(double desiredAngularVelocity) {
-        this.desiredAngularVelocity = desiredAngularVelocity;
+    public void setAngle(double angle) {
+        this.angle = angle;
     }
 
 //    public double getMagnitude() {
-//        return Math.sqrt(Math.pow(desiredSpeed, 2d) * Math.pow(desiredAngularVelocity, 2d));
+//        return Math.sqrt(Math.pow(magnitude, 2d) * Math.pow(angle, 2d));
 //    }
 //
 //    public double getAngle() {
-//        return Math.atan(desiredAngularVelocity / desiredSpeed);
+//        return Math.atan(angle / magnitude);
 //    }
 
     public void add(TankVector tankVector) {
-        this.desiredSpeed += tankVector.desiredSpeed;
-        this.desiredAngularVelocity += tankVector.desiredAngularVelocity;
+        this.magnitude += tankVector.magnitude;
+        this.angle += tankVector.angle;
     }
 }

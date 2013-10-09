@@ -36,18 +36,18 @@ public class PDController {
 
 	private Action getAngleAction(TankVector desiredVector, Environment environment, long timeElapsed) {
 		double curAngVel = environment.getMyState().getAngularVelocity();
-		double currentError = desiredVector.getDesiredAngularVelocity() - curAngVel;
+		double currentError = desiredVector.getAngle() - curAngVel;
 		double actualAngVel =
-				ANGULAR_VELOCITY_PROPORTIONAL_CONSTANT * (desiredVector.getDesiredAngularVelocity()-curAngVel) +
+				ANGULAR_VELOCITY_PROPORTIONAL_CONSTANT * (desiredVector.getAngle()-curAngVel) +
 				ANGULAR_VELOCITY_DERIVATIVE_CONSTANT * (currentError / timeElapsed);
 		return new Action(agent, Action.Type.ANGVEL, Double.toString(actualAngVel));
 	}
 
 	private Action getSpeedAction(TankVector desiredVector, Environment environment, long timeElapsed) {
 		double curSpeed = environment.getMyState().getVx() + environment.getMyState().getVy();
-		double currentError = desiredVector.getDesiredSpeed() - curSpeed;
+		double currentError = desiredVector.getMagnitude() - curSpeed;
 		double actualSpeed =
-				SPEED_PROPORTIONAL_CONSTANT * (desiredVector.getDesiredSpeed()-curSpeed) +
+				SPEED_PROPORTIONAL_CONSTANT * (desiredVector.getMagnitude()-curSpeed) +
 				SPEED_DERIVATIVE_CONSTANT * (currentError / timeElapsed);
 		return new Action(agent, Action.Type.SPEED, Double.toString(actualSpeed));
 	}
