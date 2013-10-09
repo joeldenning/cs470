@@ -15,10 +15,6 @@ public class TankVector {
         this.angle = angle;
     }
 
-//    public static TankVector createVector(double angle, double magnitude) {
-//        return new TankVector(magnitude*Math.sin(angle), magnitude*Math.cos(angle));
-//    }
-
     public double getMagnitude() {
         return magnitude;
     }
@@ -34,14 +30,6 @@ public class TankVector {
     public void setAngle(double angle) {
         this.angle = angle;
     }
-
-//    public double getMagnitude() {
-//        return Math.sqrt(Math.pow(magnitude, 2d) * Math.pow(angle, 2d));
-//    }
-//
-//    public double getAngle() {
-//        return Math.atan(angle / magnitude);
-//    }
 
     public void add(TankVector tankVector) {
         this.magnitude += tankVector.magnitude;
