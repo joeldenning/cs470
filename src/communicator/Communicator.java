@@ -27,10 +27,14 @@ public class Communicator {
         this.color = color;
 	}
 
-	public void doAction(Action action) {
-		String command = writeToSocket(action.toBZFlagString());
-		writeToSocket(command);
-	}
+	public boolean actionSucceeds(Action action) {
+        try {
+            writeToSocketVerbose(action.toBZFlagString());
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 	
 	private void connectToSocket(String host, int socket) {
 		try {
@@ -55,14 +59,18 @@ public class Communicator {
         return writeToSocket(command, false);
     }
 
-	public synchronized String writeToSocket(String command, boolean verbose) throws IOException {
-//        if( verbose )
+    public String writeToSocketVerbose(String command) throws IOException {
+        return writeToSocket(command, true);
+    }
+
+	private synchronized String writeToSocket(String command, boolean verbose) throws IOException {
+        if( verbose )
             System.out.println(command);
         out.println(command);
         String ack = in.readLine();
         if (!ack.startsWith("ack"))
             throw new IOException("Failed command '" + command + "' with error '" + ack + "'");
-//        if( verbose )
+        if( verbose )
             System.out.println("\t"+ack);
         String returned = in.readLine();
         if (returned.equals(LIST_START)) {
@@ -70,7 +78,7 @@ public class Communicator {
             String line;
             while ((line = in.readLine()) != null && !line.equals(LIST_END)) {
                 sb.append(line + "\n");
-//                if( verbose )
+                if( verbose )
                     System.out.println("\t"+line);
             }
             return sb.toString();

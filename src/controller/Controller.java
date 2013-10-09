@@ -36,9 +36,8 @@ public class Controller extends Thread {
 
     private static void init() {
         try {
-            communicator.writeToSocket("", true);
+            communicator.writeToSocketVerbose("");
         } catch (IOException e) {
-            System.out.println("\tbzrobots 1");
             //expected, since the response is "bzrobots 1", which doesn't start with "ack"
             communicator.writeToSocketNoExpectedResponse("agent 1");
             System.out.println("agent 1");
