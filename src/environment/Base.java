@@ -9,7 +9,7 @@ public class Base {
 	private List<Point2D.Double> corners;
 	
 	public Base(List<Point2D.Double> corners) {
-		this.corners = new ArrayList(corners);
+		this.corners = new ArrayList<Point2D.Double>(corners);
 	}
 	
 	public int getNumOfCorners() {

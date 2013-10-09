@@ -282,8 +282,17 @@ public class Communicator {
 			return;
         }
         Scanner scan = new Scanner(obstacles);
-		while( scan.hasNext() ) {
-			scan.next(); //skip the word obstacle
+		while( scan.hasNextLine() ) {
+			String line = scan.nextLine();
+			String splitted[] = line.split("\\s+");
+			List<Point2D.Double> corners = new ArrayList<Point2D.Double>();
+			
+			for (int i = 1; i < splitted.length; i+=2) {
+				corners.add(new Point2D.Double(Double.parseDouble(splitted[i]),Double.parseDouble(splitted[i+1])));
+			}
+			
+			environment.addObstacle(new Obstacle(corners));
+			/*
 			environment.addObstacle(
 					new Obstacle(
 							scan.nextDouble(),
@@ -294,7 +303,7 @@ public class Communicator {
             scan.nextDouble();
             scan.nextDouble();
             scan.nextDouble();
-            scan.nextDouble();
+            scan.nextDouble();*/
 		}
 		scan.close();
 	}

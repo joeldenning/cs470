@@ -43,7 +43,7 @@ public class AttractiveField extends PotentialField {
         goalY = goalY/numOfCorners;
         
         //Rough estimate on radius
-        radius = Math.abs(base.getCorner(0).x - base.getCorner(0).y);
+        radius = Math.abs((base.getCorner(0).x - base.getCorner(1).x) + (base.getCorner(0).y - base.getCorner(1).y));
         
         alpha = BASE_CONST;
     }
@@ -54,12 +54,13 @@ public class AttractiveField extends PotentialField {
     	
     	double distance = Math.sqrt(Math.pow(goalX-myself.getX(), 2) + Math.pow(goalY-myself.getY(), 2));
     	if (distance < radius) {
-    		return new TankVector(0,0);
+    		return new TankVector(0,myself.getAngle());
     	}
+    	//				This will return angle from x-axis
     	double angle = Math.atan2(goalY-myself.getY(), goalX-myself.getX());
     	double magnitude = alpha*(distance-radius);
+    	magnitude = Math.min(magnitude,1);
     	
-    	
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    	return new TankVector(magnitude,angle);
     }
 }
