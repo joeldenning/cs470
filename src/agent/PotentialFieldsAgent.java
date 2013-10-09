@@ -4,6 +4,7 @@ import agent.pdcontroller.PDController;
 import agent.potentialfields.AttractiveField;
 import agent.potentialfields.PotentialField;
 import agent.potentialfields.RepulsiveField;
+import agent.potentialfields.TangentialField;
 import agent.potentialfields.TankVector;
 import environment.Action;
 import environment.AttemptedAction;
@@ -81,7 +82,7 @@ public class PotentialFieldsAgent extends AbstractAgent {
         
         for (Obstacle ob : environment.getObstacles()) {
         	fields.add(new RepulsiveField(ob,environment.getMyState()));
-        	//TODO tangent
+        	fields.add(new TangentialField(ob,environment.getMyState()));
         }
         
         for (Team team : environment.getTeams()) {
