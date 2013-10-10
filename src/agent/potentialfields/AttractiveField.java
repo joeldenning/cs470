@@ -13,7 +13,7 @@ import environment.Tank;
  */
 public class AttractiveField extends PotentialField {
 
-	private static final double FLAG_CONST = 1;
+	private static final double FLAG_CONST = 1.5;
 	private static final double BASE_CONST = 1.5;
 	private double radius;
 	private double goalX;

@@ -187,10 +187,11 @@ public class Communicator {
 			tank.setStatus(scan.next());
 			tank.setFlag(scan.next());
 			tank.setX(scan.nextDouble());
+			tank.setY(scan.nextDouble());
 			tank.setAngle(scan.nextDouble());
 			environment.getTeam(color).addTank(tank);
             //unknown value
-            scan.next();
+            //scan.next();
 		}
 		scan.close();
 	}

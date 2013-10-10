@@ -12,8 +12,8 @@ import environment.Tank;
  */
 public class TangentialField extends PotentialField{
 
-	private static final double OBSTACLE_CONST = -.4;
-	private static final double TANK_CONST = 1;
+	private static final double OBSTACLE_CONST = -1;
+	private static final double TANK_CONST = -2;
 	private double fieldReach;
 	private double badX;
 	private double badY;
@@ -52,7 +52,7 @@ public class TangentialField extends PotentialField{
     public TangentialField(Tank otherTank, Tank myself) {
         super(myself);
         
-        fieldReach = 9;
+        fieldReach = 5;
         badX = otherTank.getX();
         badY = otherTank.getY();
         alpha = TANK_CONST;
@@ -60,7 +60,7 @@ public class TangentialField extends PotentialField{
 
     @Override
     public TankVector toTankVector() {
-        //TODO Brian
+        
     	double distance = Math.sqrt(Math.pow(badX-myself.getX(), 2) + Math.pow(badY-myself.getY(), 2));
     	if (distance > fieldReach) {
     		return new TankVector(0,myself.getAngle());
