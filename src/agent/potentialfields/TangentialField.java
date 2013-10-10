@@ -12,7 +12,7 @@ import environment.Tank;
  */
 public class TangentialField extends PotentialField{
 
-	private static final double OBSTACLE_CONST = -1;
+	private static final double OBSTACLE_CONST = -1.3;
 	private static final double TANK_CONST = -2;
 	private double fieldReach;
 	private double badX;
@@ -35,7 +35,7 @@ public class TangentialField extends PotentialField{
         badY = badY/numOfCorners;
         
         //Rough estimate on radius
-        fieldReach = 180;
+        fieldReach = 160;
         
         alpha = OBSTACLE_CONST;
 
@@ -52,7 +52,7 @@ public class TangentialField extends PotentialField{
     public TangentialField(Tank otherTank, Tank myself) {
         super(myself);
         
-        fieldReach = 5;
+        fieldReach = 8;
         badX = otherTank.getX();
         badY = otherTank.getY();
         alpha = TANK_CONST;

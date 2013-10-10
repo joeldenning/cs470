@@ -12,8 +12,8 @@ import environment.Tank;
  */
 public class RepulsiveField extends PotentialField {
 	
-	private static final double OBSTACLE_CONST = 2;
-	private static final double TANK_CONST = -.4;
+	private static final double OBSTACLE_CONST = -3;
+	private static final double TANK_CONST = -.02;
 	private double fieldReach;
 	private double badX;
 	private double badY;

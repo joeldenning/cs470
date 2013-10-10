@@ -13,7 +13,7 @@ import environment.Tank;
  */
 public class AttractiveField extends PotentialField {
 
-	private static final double FLAG_CONST = 1.5;
+	private static final double FLAG_CONST = 1.25;
 	private static final double BASE_CONST = 1.5;
 	private double radius;
 	private double goalX;
@@ -58,7 +58,8 @@ public class AttractiveField extends PotentialField {
     	}
     	//				This will return angle from x-axis
     	double angle = Math.atan2(goalY-myself.getY(), goalX-myself.getX());
-    	double magnitude = alpha*(distance-radius);
+    	double magnitude = alpha*(distance-radius) + 15;
+    	magnitude = Math.min(600, magnitude);
 
     	return new TankVector(magnitude,angle);
     }

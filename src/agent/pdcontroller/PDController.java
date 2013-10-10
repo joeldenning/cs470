@@ -18,7 +18,7 @@ import java.util.List;
 public class PDController {
 
 	private static final double
-			SPEED_PROPORTIONAL_CONSTANT = .02, SPEED_DERIVATIVE_CONSTANT = .02,
+			SPEED_PROPORTIONAL_CONSTANT = .01, SPEED_DERIVATIVE_CONSTANT = .02,
 			ANGULAR_VELOCITY_PROPORTIONAL_CONSTANT = 1, ANGULAR_VELOCITY_DERIVATIVE_CONSTANT = .5;
 	private final AbstractAgent agent;
     private double lastAngularVelocityError = 0, lastSpeedError = 0;
@@ -52,6 +52,8 @@ public class PDController {
 
         newAngVel = Math.min(1, newAngVel);
         newAngVel = Math.max(-1, newAngVel);
+        if (Math.abs(derivativeTerm) < 0.001)
+        	newAngVel = 1;
         lastAngularVelocityError = curError;
 		return new Action(agent, Action.Type.ANGVEL, Double.toString(newAngVel));
 	}
