@@ -12,14 +12,15 @@ import environment.Tank;
  */
 public class TangentialField extends PotentialField{
 
-	private static final double OBSTACLE_CONST = -1;
-	private static final double TANK_CONST = -1;
+	private static final double OBSTACLE_CONST = -.4;
+	private static final double TANK_CONST = 1;
 	private double fieldReach;
 	private double badX;
 	private double badY;
 	private double alpha;
+    private double directionSign = 1;
 	
-    public TangentialField(Obstacle obstacle, Tank myself) {
+    public TangentialField(Obstacle obstacle, Tank myself, double destX, double destY) {
         super(myself);
         
         //Find average of corners for center location
@@ -34,15 +35,24 @@ public class TangentialField extends PotentialField{
         badY = badY/numOfCorners;
         
         //Rough estimate on radius
-        fieldReach = 60;
+        fieldReach = 180;
         
         alpha = OBSTACLE_CONST;
+
+//        double slope = (myself.getY() - destY) / (myself.getX() - destX);
+//        double intercept = destY - slope * destX;
+//        double expectedY = slope * destX + intercept;
+//        if( expectedY < destY )
+//            directionSign = -1;
+//        else
+//            directionSign = 1;
+
     }
 
     public TangentialField(Tank otherTank, Tank myself) {
         super(myself);
         
-        fieldReach = 20;
+        fieldReach = 9;
         badX = otherTank.getX();
         badY = otherTank.getY();
         alpha = TANK_CONST;
@@ -56,10 +66,11 @@ public class TangentialField extends PotentialField{
     		return new TankVector(0,myself.getAngle());
     	}
     	//				This will return angle from x-axis
-    	double angle = Math.atan2(badY-myself.getY(), badX-myself.getX()) + Math.PI/2;
+
+    	double angle = Math.atan2(badY-myself.getY(), badX-myself.getX()) + directionSign * Math.PI/2;
+
     	double magnitude = alpha*(fieldReach - distance);
-    	magnitude = Math.max(magnitude,-1);
-    	
+
     	return new TankVector(magnitude,angle);
     }
 }

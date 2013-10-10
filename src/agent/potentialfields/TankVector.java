@@ -34,15 +34,15 @@ public class TankVector {
     public void add(TankVector tankVector) {
         double x = this.getXVector() + tankVector.getXVector();
         double y = this.getYVector() + tankVector.getYVector();
-        this.magnitude += tankVector.magnitude;
-        this.angle += tankVector.angle;
+        this.magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        this.angle = Math.atan2(y, x);
     }
 
     public double getXVector() {
-        return 0;
+        return magnitude * Math.cos(angle);
     }
 
     public double getYVector() {
-        return 0;
+        return magnitude * Math.sin(angle);
     }
 }

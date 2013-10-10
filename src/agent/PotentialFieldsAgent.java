@@ -15,6 +15,7 @@ import environment.Obstacle;
 import environment.Tank;
 import environment.Team;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,18 +65,19 @@ public class PotentialFieldsAgent extends AbstractAgent {
         return actions;
     }
 
-    private TankVector sum(List<PotentialField> potentialFields) {
+    protected TankVector sum(List<PotentialField> potentialFields) {
         TankVector sum = new TankVector(0, 0);
         for( PotentialField potentialField : potentialFields )
             sum.add(potentialField.toTankVector());
         return sum;  //To change body of created methods use File | Settings | File Templates.
     }
 
-    private List<PotentialField> generatePotentialFields(Environment environment) {
+    protected List<PotentialField> generatePotentialFields(Environment environment) {
         //TODO Brian - find the closest flag and create an attractive field
     	List<PotentialField> fields = new ArrayList<PotentialField>();
+        Flag closestFlag = null;
         if( state == State.PURSUING ) {
-            Flag closestFlag = findColorOfClosestFlag(environment);
+            closestFlag = findClosestFlag(environment);
             fields.add(new AttractiveField(closestFlag, environment.getMyState()));
         } else {
             Base mybase = environment.getMyTeam().getBase();
@@ -84,31 +86,48 @@ public class PotentialFieldsAgent extends AbstractAgent {
         
         for (Obstacle ob : environment.getObstacles()) {
         	fields.add(new RepulsiveField(ob,environment.getMyState()));
-        	fields.add(new TangentialField(ob,environment.getMyState()));
+            if( state == State.PURSUING )
+            	fields.add(new TangentialField(ob,environment.getMyState(), closestFlag.getX(), closestFlag.getY()));
+            else {
+                //returning
+                double destX = 0, destY = 0;
+                for( int i=0; i<environment.getMyTeam().getBase().getNumOfCorners(); i++ ) {
+                    Point2D point = environment.getMyTeam().getBase().getCorner(i);
+                    destX += point.getX();
+                    destY += point.getY();
+                }
+                destX /= (double)environment.getMyTeam().getBase().getNumOfCorners();
+                destY /= (double)environment.getMyTeam().getBase().getNumOfCorners();
+                fields.add(new TangentialField(ob, environment.getMyState(), destX, destY));
+            }
         }
-        
+
         for (Team team : environment.getTeams()) {
         	for (Tank tank : team.getTanks()) {
         		fields.add(new RepulsiveField(tank,environment.getMyState()));
+                fields.add(new TangentialField(tank, environment.getMyState()));
         	}
         }
         
         return fields;
     }
 
-    private Flag findColorOfClosestFlag(Environment environment) {
+    private Flag findClosestFlag(Environment environment) {
     	double closestDistance = Double.MAX_VALUE;
     	Flag closestFlag = null;
     	double myX = environment.getMyState().getX();
     	double myY = environment.getMyState().getY();
 		for (Flag flag : environment.getFlags()) {
-			double distance = Math.sqrt(Math.pow(flag.getX()-myX, 2) + Math.pow(flag.getY()-myY, 2));
-			if (closestDistance > distance) {
-				closestDistance = distance;
-				closestFlag = flag;
-			}
+            if( !flag.equals(environment.getMyTeam().getFlag()) ) {
+                double distance = Math.sqrt(Math.pow(flag.getX()-myX, 2) + Math.pow(flag.getY()-myY, 2));
+                if (closestDistance > distance) {
+                    closestDistance = distance;
+                    closestFlag = flag;
+                }
+            }
 		}
-		return closestFlag;
+//        System.out.println(closestFlag.getX()+", "+closestFlag.getY());
+        return closestFlag;
 	}
 
 	@Override
@@ -120,11 +139,11 @@ public class PotentialFieldsAgent extends AbstractAgent {
 	}
 
     public void findState(Environment environment) {
-        if( environment.getMyState().getFlag() != null
-                && !environment.getMyState().getFlag().equalsIgnoreCase(environment.getMyTeamColor()) )
-            state = State.PURSUING;
-        else
+        if( !environment.getMyState().getFlag().equalsIgnoreCase(environment.getMyTeamColor())
+                && !environment.getMyState().getFlag().equalsIgnoreCase("-"))
             state = State.RETURNING;
+        else
+            state = State.PURSUING;
     }
 
     private enum State {

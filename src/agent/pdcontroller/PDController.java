@@ -18,8 +18,8 @@ import java.util.List;
 public class PDController {
 
 	private static final double
-			SPEED_PROPORTIONAL_CONSTANT = .01, SPEED_DERIVATIVE_CONSTANT = .5,
-			ANGULAR_VELOCITY_PROPORTIONAL_CONSTANT = .01, ANGULAR_VELOCITY_DERIVATIVE_CONSTANT = .5;
+			SPEED_PROPORTIONAL_CONSTANT = .02, SPEED_DERIVATIVE_CONSTANT = .02,
+			ANGULAR_VELOCITY_PROPORTIONAL_CONSTANT = 1, ANGULAR_VELOCITY_DERIVATIVE_CONSTANT = .5;
 	private final AbstractAgent agent;
     private double lastAngularVelocityError = 0, lastSpeedError = 0;
 
@@ -31,13 +31,18 @@ public class PDController {
         List<Action> actions = new ArrayList<Action>();
 	    actions.add(getSpeedAction(desiredVector, environment, timeElapsed));
 	    actions.add(getAngleAction(desiredVector, environment, timeElapsed));
+        if( environment.getMyState().getTimeToReload() <= 0 )
+            actions.add(new Action(agent, Action.Type.SHOOT, ""));
 	    return actions;
     }
 
 	private Action getAngleAction(TankVector desiredVector, Environment environment, long timeElapsed) {
 		double curAngVel = environment.getMyState().getAngularVelocity();
-        double desiredMinusActualAngle = desiredVector.getAngle() - environment.getMyState().getAngle();
-        double desiredAngVel = Math.max(-1d, desiredMinusActualAngle);
+        double counterClockwiseDifference = desiredVector.getAngle() - environment.getMyState().getAngle();
+        double clockwiseDifference = -2 * Math.PI - environment.getMyState().getAngle() - desiredVector.getAngle();
+//        double clockwiseDifference = clockwiseAngle - environment.getMyState().getAngle();
+        double chosenDiff = Math.min(Math.abs(counterClockwiseDifference), Math.abs(clockwiseDifference));
+        double desiredAngVel = Math.max(-1d, chosenDiff);
         desiredAngVel = Math.min(1d, desiredAngVel);
 		double curError = desiredAngVel - curAngVel;
         double derivativeTerm = curError - lastAngularVelocityError;
@@ -45,6 +50,8 @@ public class PDController {
 				ANGULAR_VELOCITY_PROPORTIONAL_CONSTANT * curError +
 				ANGULAR_VELOCITY_DERIVATIVE_CONSTANT * derivativeTerm / timeElapsed;
 
+        newAngVel = Math.min(1, newAngVel);
+        newAngVel = Math.max(-1, newAngVel);
         lastAngularVelocityError = curError;
 		return new Action(agent, Action.Type.ANGVEL, Double.toString(newAngVel));
 	}
@@ -57,6 +64,8 @@ public class PDController {
 				SPEED_PROPORTIONAL_CONSTANT * curError +
 				SPEED_DERIVATIVE_CONSTANT * derivativeTerm / timeElapsed;
 
+        newSpeed = Math.min(1, newSpeed);
+        newSpeed = Math.max(-1, newSpeed);
         lastSpeedError = curError;
 		return new Action(agent, Action.Type.SPEED, Double.toString(newSpeed));
 	}

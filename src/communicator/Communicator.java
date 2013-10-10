@@ -29,7 +29,7 @@ public class Communicator {
 
 	public boolean actionSucceeds(Action action) {
         try {
-            writeToSocketVerbose(action.toBZFlagString());
+            writeToSocketSilent(action.toBZFlagString());
             return true;
         } catch (IOException e) {
             return false;

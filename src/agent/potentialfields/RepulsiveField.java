@@ -12,8 +12,8 @@ import environment.Tank;
  */
 public class RepulsiveField extends PotentialField {
 	
-	private static final double OBSTACLE_CONST = -1;
-	private static final double TANK_CONST = -1;
+	private static final double OBSTACLE_CONST = 0;
+	private static final double TANK_CONST = -.4;
 	private double fieldReach;
 	private double badX;
 	private double badY;
@@ -34,7 +34,7 @@ public class RepulsiveField extends PotentialField {
         badY = badY/numOfCorners;
         
         //Rough estimate on radius
-        fieldReach = 60;
+        fieldReach = 85;
         
         alpha = OBSTACLE_CONST;
     }
@@ -42,7 +42,7 @@ public class RepulsiveField extends PotentialField {
     public RepulsiveField(Tank otherTank, Tank myself) {
         super(myself);
         
-        fieldReach = 20;
+        fieldReach = 3;
         badX = otherTank.getX();
         badY = otherTank.getY();
         alpha = TANK_CONST;
@@ -58,8 +58,7 @@ public class RepulsiveField extends PotentialField {
     	//				This will return angle from x-axis
     	double angle = Math.atan2(badY-myself.getY(), badX-myself.getX());
     	double magnitude = alpha*(fieldReach - distance);
-    	magnitude = Math.max(magnitude,-1);
-    	
+
     	return new TankVector(magnitude,angle);
     }
 }

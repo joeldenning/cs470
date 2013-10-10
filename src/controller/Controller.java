@@ -1,8 +1,8 @@
 package controller;
 
 import agent.AbstractAgent;
-import agent.DumbAgent;
 import agent.PotentialFieldsAgent;
+import agent.PotentialFieldsTestAgent;
 import environment.AttemptedAction;
 import communicator.Communicator;
 import environment.Action;
