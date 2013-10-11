@@ -1,6 +1,7 @@
 package controller;
 
 import agent.AbstractAgent;
+import agent.DumbAgent;
 import agent.PotentialFieldsAgent;
 import agent.PotentialFieldsTestAgent;
 import environment.AttemptedAction;
@@ -23,7 +24,7 @@ public class Controller extends Thread {
         communicator = new Communicator(args[0], Integer.parseInt(args[1]), args[2]);
         init();
         for( int i=0; i<numOfAgents; i++ ) {
-            Controller controller = new Controller(new PotentialFieldsTestAgent(i));
+            Controller controller = new Controller(new PotentialFieldsAgent(i));
             controller.start();
         }
 	}

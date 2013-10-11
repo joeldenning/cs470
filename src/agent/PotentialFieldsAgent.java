@@ -78,7 +78,11 @@ public class PotentialFieldsAgent extends AbstractAgent {
         Flag closestFlag = null;
         if( state == State.PURSUING ) {
             closestFlag = findClosestFlag(environment);
-            fields.add(new AttractiveField(closestFlag, environment.getMyState()));
+            if (closestFlag != null)
+            	fields.add(new AttractiveField(closestFlag, environment.getMyState()));
+            else {
+            	Base bb = findClosestEnemyBase(environment);
+            }
         } else {
             Base mybase = environment.getMyTeam().getBase();
             fields.add(new AttractiveField(mybase,environment.getMyState()));
@@ -121,7 +125,7 @@ public class PotentialFieldsAgent extends AbstractAgent {
     	double myX = environment.getMyState().getX();
     	double myY = environment.getMyState().getY();
 		for (Flag flag : environment.getFlags()) {
-            if( !flag.equals(environment.getMyTeam().getFlag()) ) {
+            if( !flag.equals(environment.getMyTeam().getFlag())  && !flag.getPossessingColor().equals(environment.getMyTeamColor())) {
                 double distance = Math.sqrt(Math.pow(flag.getX()-myX, 2) + Math.pow(flag.getY()-myY, 2));
                 if (closestDistance > distance) {
                     closestDistance = distance;
@@ -129,8 +133,28 @@ public class PotentialFieldsAgent extends AbstractAgent {
                 }
             }
 		}
+		
 //        System.out.println(closestFlag.getX()+", "+closestFlag.getY());
         return closestFlag;
+	}
+    
+    private Base findClosestEnemyBase(Environment environment) {
+    	double closestDistance = Double.MAX_VALUE;
+    	Base closest = null;
+    	double myX = environment.getMyState().getX();
+    	double myY = environment.getMyState().getY();
+		for (Team tt : environment.getTeams()) {
+            if( !tt.getBase().equals(environment.getMyTeam().getBase())) {
+                double distance = Math.sqrt(Math.pow(tt.getBase().getCorner(0).x-myX, 2) + Math.pow(tt.getBase().getCorner(0).y-myY, 2));
+                if (closestDistance > distance) {
+                    closestDistance = distance;
+                    closest = tt.getBase();
+                }
+            }
+		}
+		
+//        System.out.println(closestFlag.getX()+", "+closestFlag.getY());
+        return closest;
 	}
 
 	@Override
