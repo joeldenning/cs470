@@ -14,6 +14,11 @@ public class DumbAgent extends AbstractAgent {
     private Random random = new Random();
     private State state;
 
+    private static Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
+    static {
+        desiredEnvironment.put(Environment.Component.OTHER_TEAMS, null);
+    }
+
     public DumbAgent(int tankIndex) {
         super(tankIndex);
         shotFired();
@@ -76,7 +81,7 @@ public class DumbAgent extends AbstractAgent {
 
 	@Override
 	public Map<Environment.Component, Collection<String>> desiredEnvironment() {
-		return new HashMap<Environment.Component, Collection<String>>();
+		return desiredEnvironment;
 	}
 
 	private void slowingRotation() {
