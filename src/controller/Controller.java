@@ -23,7 +23,7 @@ public class Controller extends Thread {
         communicator = new Communicator(args[0], Integer.parseInt(args[1]), args[2]);
         init();
         for( int i=0; i<numOfAgents; i++ ) {
-            Controller controller = new Controller(new PotentialFieldsAgent(i));
+            Controller controller = new Controller(new PotentialFieldsTestAgent(i));
             controller.start();
         }
 	}
@@ -61,7 +61,7 @@ public class Controller extends Thread {
     public void run() {
         while(true) {
             Environment environment = communicator.getEnvironment(agent);
-            if( environment.getMyState().getStatus() == Tank.Status.alive )
+            if( environment.getMyState().getStatus() == Tank.Status.alive || true)
                 goToGoal(environment);
             else
                 break;

@@ -78,16 +78,18 @@ public class PotentialFieldsAgent extends AbstractAgent {
         Flag closestFlag = null;
         if( state == State.PURSUING ) {
             closestFlag = findClosestFlag(environment);
-            fields.add(new AttractiveField(closestFlag, environment.getMyState()));
+//            fields.add(new AttractiveField(closestFlag, environment.getMyState()));
         } else {
             Base mybase = environment.getMyTeam().getBase();
-            fields.add(new AttractiveField(mybase,environment.getMyState()));
+//            fields.add(new AttractiveField(mybase,environment.getMyState()));
         }
         
         for (Obstacle ob : environment.getObstacles()) {
         	fields.add(new RepulsiveField(ob,environment.getMyState()));
-            if( state == State.PURSUING )
+            if( state == State.PURSUING ) {
             	fields.add(new TangentialField(ob,environment.getMyState(), closestFlag.getX(), closestFlag.getY()));
+            	fields.add(new RepulsiveField(ob, environment.getMyState()));
+            }
             else {
                 //returning
                 double destX = 0, destY = 0;
@@ -99,6 +101,7 @@ public class PotentialFieldsAgent extends AbstractAgent {
                 destX /= (double)environment.getMyTeam().getBase().getNumOfCorners();
                 destY /= (double)environment.getMyTeam().getBase().getNumOfCorners();
                 fields.add(new TangentialField(ob, environment.getMyState(), destX, destY));
+                fields.add(new RepulsiveField(ob, environment.getMyState()));
             }
         }
 
