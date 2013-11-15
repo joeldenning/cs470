@@ -10,9 +10,18 @@ import java.util.HashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class OccupancyGrid extends HashMap<OccupancyGrid.Coordinate, Boolean> {
-	private boolean occupied;
 
-	public void setOccupied(int x, int y, boolean occupied) {
+    public static final int SIZE_OF_GRID = 100;
+
+	private boolean occupied;
+    private int x, y;
+
+    public OccupancyGrid(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void setOccupied(int x, int y, boolean occupied) {
 		Coordinate coordinate = new Coordinate(x, y);
 		this.put(coordinate, occupied);
 	}
@@ -21,7 +30,15 @@ public class OccupancyGrid extends HashMap<OccupancyGrid.Coordinate, Boolean> {
 		return this.get(new Coordinate(x, y));
 	}
 
-	public static class Coordinate {
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public static class Coordinate {
 		private int x, y;
 
 		public Coordinate(int x, int y) {

@@ -50,7 +50,6 @@ public class RepulsiveField extends PotentialField {
 
     @Override
     public TankVector toTankVector() {
-        //TODO Brian
     	double distance = Math.sqrt(Math.pow(badX-myself.getX(), 2) + Math.pow(badY-myself.getY(), 2));
     	if (distance > fieldReach) {
     		return new TankVector(0,myself.getAngle());

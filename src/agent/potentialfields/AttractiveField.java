@@ -22,7 +22,7 @@ public class AttractiveField extends PotentialField {
 	
     public AttractiveField(Flag flag, Tank myself) {
         super(myself);
-        radius = 1;//TODO What should this be?
+        radius = 1;//What should this be?
         goalX = flag.getX();
         goalY = flag.getY();
         alpha = FLAG_CONST;
@@ -50,8 +50,6 @@ public class AttractiveField extends PotentialField {
 
     @Override
     public TankVector toTankVector() {
-        //TODO Brian
-    	
     	double distance = Math.sqrt(Math.pow(goalX-myself.getX(), 2) + Math.pow(goalY-myself.getY(), 2));
     	if (distance < radius) {
     		return new TankVector(0,myself.getAngle());

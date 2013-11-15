@@ -73,16 +73,15 @@ public class PotentialFieldsAgent extends AbstractAgent {
     }
 
     protected List<PotentialField> generatePotentialFields(Environment environment) {
-        //TODO Brian - find the closest flag and create an attractive field
     	List<PotentialField> fields = new ArrayList<PotentialField>();
         Flag closestFlag = null;
         if( state == State.PURSUING ) {
             closestFlag = findClosestFlag(environment);
-            if (closestFlag != null)
+//            if (closestFlag != null)
             	fields.add(new AttractiveField(closestFlag, environment.getMyState()));
-            else {
-            	Base bb = findClosestEnemyBase(environment);
-            }
+//            else {
+//            	Base bb = findClosestEnemyBase(environment);
+//            }
         } else {
             Base mybase = environment.getMyTeam().getBase();
             fields.add(new AttractiveField(mybase,environment.getMyState()));

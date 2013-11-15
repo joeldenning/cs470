@@ -91,7 +91,7 @@ public class Communicator {
 		Environment environment = new Environment(color);
 
 		Map<Environment.Component, Collection<String>> desiredEnvironment = agent.desiredEnvironment();
-		if( desiredEnvironment.containsKey(Environment.Component.OTHER_TEAMS) )
+//		if( desiredEnvironment.containsKey(Environment.Component.OTHER_TEAMS) )
 			loadTeams(environment);
 		if( desiredEnvironment.containsKey(Environment.Component.OBSTACLES) )
 			loadObstacles(environment);

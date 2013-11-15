@@ -1,9 +1,6 @@
 package controller;
 
-import agent.AbstractAgent;
-import agent.DumbAgent;
-import agent.PotentialFieldsAgent;
-import agent.PotentialFieldsTestAgent;
+import agent.*;
 import environment.AttemptedAction;
 import communicator.Communicator;
 import environment.Action;
@@ -23,8 +20,14 @@ public class Controller extends Thread {
         int numOfAgents = Integer.parseInt(args[3]);
         communicator = new Communicator(args[0], Integer.parseInt(args[1]), args[2]);
         init();
-        for( int i=0; i<numOfAgents; i++ ) {
-            Controller controller = new Controller(new PotentialFieldsAgent(i));
+        GridFilterControllerAgent controllerAgent = null;
+        if( numOfAgents > 0 ) {
+            controllerAgent = new GridFilterControllerAgent(0);
+            Controller controller = new Controller(controllerAgent);
+            controller.start();
+        }
+        for( int i=1; i<numOfAgents; i++ ) {
+            Controller controller = new Controller(new GridFilterAgent(i));
             controller.start();
         }
 	}
@@ -62,7 +65,7 @@ public class Controller extends Thread {
     public void run() {
         while(true) {
             Environment environment = communicator.getEnvironment(agent);
-            if( environment.getMyState().getStatus() == Tank.Status.alive || true)
+            if( environment.getMyState().getStatus() == Tank.Status.alive || true )
                 goToGoal(environment);
             else
                 break;
