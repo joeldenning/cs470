@@ -36,8 +36,8 @@ public class GridFilterAgent extends AbstractAgent {
 
     private void updateGrid(Environment environment) {
         OccupancyGrid occupancyGrid = environment.getOccupancyGrid();
-        for( int x=0; x<OccupancyGrid.SIZE_OF_GRID; x++ ) {
-            for( int y=0; y<OccupancyGrid.SIZE_OF_GRID; y++ ) {
+        for( int x=(int)environment.getMyState().getX(); x<OccupancyGrid.SIZE_OF_GRID; x++ ) {
+            for( int y=(int)environment.getMyState().getY(); y<OccupancyGrid.SIZE_OF_GRID; y++ ) {
                 boolean reportedOccupied = occupancyGrid.isOccupied(x, y);
                 //TODO Brian - Grid filter updating
             }
