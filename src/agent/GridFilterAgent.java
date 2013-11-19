@@ -40,6 +40,7 @@ public class GridFilterAgent extends AbstractAgent {
             for( int y=0; y<OccupancyGrid.SIZE_OF_GRID; y++ ) {
                 boolean reportedOccupied = occupancyGrid.isOccupied(x, y);
                 //TODO Brian - Grid filter updating
+                //look up helicopter example
             }
         }
     }
