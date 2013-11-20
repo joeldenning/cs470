@@ -29,6 +29,11 @@ public class GridFilterControllerAgent extends GridFilterAgent {
         if( grid == null ) {
             int size = Integer.parseInt(environment.getConstant("worldsize"));
             grid = new double[size][size];
+            for (int x = 0; x < size; x++)
+            {
+            	for (int y = 0; y < size; y++)
+                    grid[x][y]=.5;
+            }
             truePositive = Double.parseDouble(environment.getConstant("truepositive"));
             trueNegative = Double.parseDouble(environment.getConstant("truenegative"));
         }
@@ -64,16 +69,21 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     				NewRect popped;
     				do {
     					popped = partail_rect.pop();
-    					Rect lastRect = bestFound.peek();
     					Rect newRect = new Rect(x,popped.y,x+width-1,y-1);
-    					if (lastRect.interesect(newRect)) { //does this take any cells used by the last rectangle we found?
-    						if (lastRect.area() < width*(y-popped.y)) {
-    							bestFound.pop();
-    							bestFound.push(newRect);
-    						}
+    					if (bestFound.empty()) {
+    						bestFound.push(newRect);
     					}
     					else {
-    						bestFound.push(newRect);//we can always push
+	    					Rect lastRect = bestFound.peek();
+	    					if (lastRect.interesect(newRect)) { //does this take any cells used by the last rectangle we found?
+	    						if (lastRect.area() < width*(y-popped.y)) {
+	    							bestFound.pop();
+	    							bestFound.push(newRect);
+	    						}
+	    					}
+	    					else {
+	    						bestFound.push(newRect);//we can always push
+	    					}
     					}
     					width = popped.width;
     				} while (cache[y] < width);
@@ -91,10 +101,10 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     	while (!bestFound.empty()) {
     		Rect aRect = bestFound.pop();
     		List<Point2D.Double> corners = new ArrayList<Point2D.Double>();
-    		corners.add(new Point2D.Double(aRect.llx,aRect.lly));
-    		corners.add(new Point2D.Double(aRect.urx,aRect.lly));
-    		corners.add(new Point2D.Double(aRect.llx,aRect.ury));
-    		corners.add(new Point2D.Double(aRect.urx,aRect.ury));
+    		corners.add(new Point2D.Double(aRect.llx-grid.length/2,aRect.lly-grid.length/2));
+    		corners.add(new Point2D.Double(aRect.urx-grid.length/2,aRect.lly-grid.length/2));
+    		corners.add(new Point2D.Double(aRect.llx-grid.length/2,aRect.ury-grid.length/2));
+    		corners.add(new Point2D.Double(aRect.urx-grid.length/2,aRect.ury-grid.length/2));
     		obstacles.add(new Obstacle(corners));
     	}
     }

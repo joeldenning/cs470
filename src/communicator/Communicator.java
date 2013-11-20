@@ -132,27 +132,25 @@ public class Communicator {
 			System.err.println(e.getMessage());
 			return;
 		}
-		while (scan.hasNext()) {
-			scan.next(); //skip the word at
-			String dim = scan.next();
-			String[] dimArr = dim.split(",");
-			int originX = Integer.parseInt(dimArr[0]);
-			int originY = Integer.parseInt(dimArr[1]);
-			scan.next(); //skip the word size
-			String size = scan.next();
-			String[] sizeArr = size.split("x");
-			int sizeX = Integer.parseInt(sizeArr[0]);
-			int sizeY = Integer.parseInt(sizeArr[1]);
-			scan.nextLine();
-			for (int x = 0; x < sizeX; x++) {
-				String line = scan.nextLine();
-				for (int y = 0; y < sizeY; y++) {
-					char occupied = line.charAt(y);
-					environment.getOccupancyGrid().setOccupied(originX + x, originY + y, occupied != '0');
-				}
+		scan.next(); //skip the word at
+		String dim = scan.next();
+		String[] dimArr = dim.split(",");
+		int originX = Integer.parseInt(dimArr[0]);
+		int originY = Integer.parseInt(dimArr[1]);
+		scan.next(); //skip the word size
+		String size = scan.next();
+		String[] sizeArr = size.split("x");
+		int sizeX = Integer.parseInt(sizeArr[0]);
+		int sizeY = Integer.parseInt(sizeArr[1]);
+		scan.nextLine();
+		for (int x = 0; x < sizeX; x++) {
+			String line = scan.nextLine();
+			for (int y = 0; y < sizeY; y++) {
+				char occupied = line.charAt(y);
+				environment.getOccupancyGrid().setOccupied(originX + x, originY + y, occupied != '0');
 			}
-			scan.close();
 		}
+		scan.close();
 	}
 
 	private void loadConstants(Environment environment) {

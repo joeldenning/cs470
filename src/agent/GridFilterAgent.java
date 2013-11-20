@@ -31,30 +31,34 @@ public class GridFilterAgent extends AbstractAgent {
             return new ArrayList<Action>();
         updateGrid(environment);
         //TODO Joel - add tank movement actions
-        return null;
+        return new ArrayList<Action>();
     }
 
     private void updateGrid(Environment environment) {
         OccupancyGrid occupancyGrid = environment.getOccupancyGrid();
-        for( int x=(int)environment.getMyState().getX(); x<OccupancyGrid.SIZE_OF_GRID; x++ ) {
-            for( int y=(int)environment.getMyState().getY(); y<OccupancyGrid.SIZE_OF_GRID; y++ ) {
-                boolean reportedOccupied = occupancyGrid.isOccupied(x, y);
-                if (reportedOccupied) {
-                	double bel_occ = truePositive * grid[x][y];
-                	double bel_not_occ = (1-trueNegative) * (1-grid[x][y]);
-                	updateGrid(x,y,bel_occ/(bel_occ+bel_not_occ));
-                }
-                else {
-                	double bel_occ = (1-truePositive) * grid[x][y];
-                	double bel_not_occ = trueNegative * (1-grid[x][y]);
-                	updateGrid(x,y,bel_occ/(bel_occ+bel_not_occ));
-                }
+        Set<Map.Entry<OccupancyGrid.Coordinate, Boolean>> occGridEntries = occupancyGrid.entrySet();
+        for (Map.Entry<OccupancyGrid.Coordinate, Boolean> entry: occGridEntries) {
+            boolean reportedOccupied = entry.getValue();
+            int x = entry.getKey().getX();
+            int y = entry.getKey().getY();
+            if (reportedOccupied) {
+            	double bel_occ = truePositive * accessGrid(x,y);
+            	double bel_not_occ = (1-trueNegative) * (1-accessGrid(x,y));
+            	updateGrid(x,y,bel_occ/(bel_occ+bel_not_occ));
+            }
+            else {
+            	double bel_occ = (1-truePositive) * accessGrid(x,y);
+            	double bel_not_occ = trueNegative * (1-accessGrid(x,y));
+            	updateGrid(x,y,bel_occ/(bel_occ+bel_not_occ));
             }
         }
     }
-
+    
+    protected synchronized double accessGrid(int x, int y) {
+    	return grid[x + grid.length/2][y + grid.length/2];
+    }
     protected synchronized void updateGrid(int x, int y, double probability) {
-        grid[x][y] = probability;
+        grid[x + grid.length/2][y + grid.length/2] = probability;
     }
 
     @Override
