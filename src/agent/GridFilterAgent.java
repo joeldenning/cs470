@@ -12,7 +12,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class GridFilterAgent extends AbstractAgent {
-    protected static double[][] grid;
+    protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
     protected double truePositive, trueNegative;
@@ -39,8 +39,16 @@ public class GridFilterAgent extends AbstractAgent {
         for( int x=(int)environment.getMyState().getX(); x<OccupancyGrid.SIZE_OF_GRID; x++ ) {
             for( int y=(int)environment.getMyState().getY(); y<OccupancyGrid.SIZE_OF_GRID; y++ ) {
                 boolean reportedOccupied = occupancyGrid.isOccupied(x, y);
-                //TODO Brian - Grid filter updating
-                //look up helicopter example
+                if (reportedOccupied) {
+                	double bel_occ = truePositive * grid[x][y];
+                	double bel_not_occ = (1-trueNegative) * (1-grid[x][y]);
+                	updateGrid(x,y,bel_occ/(bel_occ+bel_not_occ));
+                }
+                else {
+                	double bel_occ = (1-truePositive) * grid[x][y];
+                	double bel_not_occ = trueNegative * (1-grid[x][y]);
+                	updateGrid(x,y,bel_occ/(bel_occ+bel_not_occ));
+                }
             }
         }
     }
