@@ -108,6 +108,13 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     		obstacles.add(new Obstacle(corners));
     	}
     }
+    
+//    private boolean[][] blackWhiteGrid(){
+//    	boolean[][] toReturn = new boolean[grid.length][grid.length];
+//    	for 
+//    	
+//    	return toReturn;
+//    }
 
     private void update_cache(int[] cache, int x) {
 		for (int y = 0; y < grid.length; y++) {
