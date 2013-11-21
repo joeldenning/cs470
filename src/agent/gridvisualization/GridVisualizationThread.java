@@ -20,7 +20,7 @@ public class GridVisualizationThread extends Thread {
 		Dimension dimension = new Dimension(800, 800);
 		frame = new JFrame();
 		frame.setSize(dimension);
-		frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
+		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
 		gridComponent = new GridComponent();
 		gridComponent.setPreferredSize(dimension);
 		gridComponent.setMinimumSize(dimension);

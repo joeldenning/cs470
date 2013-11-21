@@ -13,6 +13,7 @@ import java.awt.*;
 public class GridComponent extends JPanel {
 
 	private double[][] grid;
+    private static final int ZOOM_FACTOR = 1;
 
 	public void setGrid(double[][] grid) {
 		this.grid = grid;
@@ -20,16 +21,21 @@ public class GridComponent extends JPanel {
 
 	@Override
 	public void paintComponent(Graphics g) {
-		super.paint(g);
-		for( int x=0; x<grid.length; x++ ) {
-			if (grid[0] != null) {
-				for (int y = 0; y <grid[0].length; y++ ) {
-					double inverseProb = 1 - grid[x][y];
-					long rgb = Math.round(inverseProb*255d);
-					g.setColor(new Color(rgb, rgb, rgb));
-					g.drawLine(x,y,x,y);
-				}
-			}
-		}
-	}
+        super.paintComponent(g);
+        if(grid != null) {
+            for (int x = 0; x < grid.length; x++) {
+                if (grid[0] != null) {
+                    for (int y = 0; y < grid[0].length; y++) {
+                        double inverseProb = 1 - grid[x][y];
+                        int rgb = (int) Math.round(inverseProb * 255d);
+                        Color gray = new Color(rgb, rgb, rgb);
+                        g.setColor(gray);
+                        int pixelX = ZOOM_FACTOR * x;
+                        int pixelY = ZOOM_FACTOR * y;
+                        g.drawRect(pixelX, pixelY, ZOOM_FACTOR, ZOOM_FACTOR);
+                    }
+                }
+            }
+        }
+    }
 }

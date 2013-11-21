@@ -16,15 +16,16 @@ public class GridVisualizationThreadTest {
 	public void test() {
 		GridVisualizationThread thread = new GridVisualizationThread();
 		thread.start();
-		final int size = 100;
+		final int size = 800;
 		double[][] grid = new double[size][size];
 		Random rand = new Random();
 		for( int x=0; x<size; x++ ) {
 			for( int y=0; y<size; y++ ) {
-				grid[x][y] = rand.nextDouble();
+//				grid[x][y] = Math.round(rand.nextDouble());
+                grid[x][y] = rand.nextDouble();
 			}
 		}
 		thread.updateGrid(grid);
-		System.out.println("here");
+		while( true ) {}
 	}
 }
