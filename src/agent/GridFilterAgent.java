@@ -12,10 +12,16 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class GridFilterAgent extends AbstractAgent {
+
+	private static final long MAX_STATE_DURATION = 5000l;
     protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
     protected double truePositive, trueNegative;
+	private Random rand = new Random();
+
+	private State state = State.TURNING;
+	private long nextStateChange = -1;
 
     public GridFilterAgent(int tankIndex) {
         super(tankIndex);
@@ -30,8 +36,31 @@ public class GridFilterAgent extends AbstractAgent {
         if( grid == null )
             return new ArrayList<Action>();
         updateGrid(environment);
-        //TODO Joel - add tank movement actions
-        return new ArrayList<Action>();
+	    List<Action> actions = new ArrayList<Action>();
+	    long curTime = System.currentTimeMillis();
+	    if( curTime >= nextStateChange ) {
+		    switch( state ) {
+			    case TURNING:
+				    state = State.STRAIGHT;
+				    actions.add(new Action(this, Action.Type.ANGVEL, "0"));
+				    break;
+			    case STRAIGHT:
+				    state = State.TURNING;
+				    String angVel;
+				    if( rand.nextBoolean() )
+					    angVel = "1.0";
+				    else
+				        angVel = "-1.0";
+				    actions.add(new Action(this, Action.Type.ANGVEL, angVel));
+				    break;
+		    }
+		    if( nextStateChange < 0 ) {
+			    //first time
+			    actions.add(new Action(this, Action.Type.SPEED, "1.0"));
+		    }
+		    nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION);
+	    }
+        return actions;
     }
 
     private void updateGrid(Environment environment) {
@@ -70,4 +99,8 @@ public class GridFilterAgent extends AbstractAgent {
     public Map<Environment.Component, Collection<String>> desiredEnvironment() {
         return desiredEnvironment;
     }
+
+	private enum State {
+		STRAIGHT, TURNING
+	}
 }

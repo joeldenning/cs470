@@ -1,5 +1,6 @@
 package agent;
 
+import agent.gridvisualization.GridVisualizationThread;
 import environment.Action;
 import environment.AttemptedAction;
 import environment.Environment;
@@ -19,9 +20,12 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 
     protected Set<Obstacle> obstacles = new HashSet<Obstacle>();
     private static double BEL_THRESH = 0.7;
+	private GridVisualizationThread gridVisualizationThread;
 
     public GridFilterControllerAgent(int tankIndex) {
         super(tankIndex);
+	    gridVisualizationThread = new GridVisualizationThread();
+	    gridVisualizationThread.start();
     }
 
     @Override
@@ -121,7 +125,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 	}
 
 	private void updateOpenGL() {
-        //TODO Joel
+        gridVisualizationThread.updateGrid(grid);
     }
     
 }
