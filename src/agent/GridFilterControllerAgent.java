@@ -18,15 +18,18 @@ import java.util.*;
  */
 public class GridFilterControllerAgent extends GridFilterAgent {
 
-    private static final int RECTANGLE_THRESHOLD = 10;
+    private static final int RECTANGLE_THRESHOLD = 15;
     protected Set<Obstacle> obstacles = new HashSet<Obstacle>();
     private static double BEL_THRESH = 0.7;
+    private static int WAIT_CYCLE = 10;
 	private GridVisualizationThread gridVisualizationThread;
+	private int cycleCount;
 
     public GridFilterControllerAgent(int tankIndex) {
         super(tankIndex);
 	    gridVisualizationThread = new GridVisualizationThread();
 	    gridVisualizationThread.start();
+	    cycleCount = 0;
     }
 
     @Override
@@ -47,7 +50,14 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 
     @Override
     public void processAttemptedActions(List<AttemptedAction> attemptedActions) {
-        analyzeForObstacles();
+        
+        if (cycleCount == WAIT_CYCLE) {
+        	analyzeForObstacles();
+        	cycleCount = 0;
+        }
+        else {
+        	cycleCount++;
+        }
         updateVisualization();
     }
 
@@ -57,53 +67,67 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     	
     	//find largest rectangle, algorithm from http://www.drdobbs.com/database/the-maximal-rectangle-problem/184410529
     	//extended to find all rectangles
+    	
+    	
     	Stack<Rect> bestFound = new Stack<Rect>();//This is a stack as the algorithm moves along x linearly
-    	Stack<NewRect> partail_rect = new Stack<NewRect>();
+    	boolean[][] blackWhiteGrid = getBlackWhiteGrid();
     	int[] cache = new int[grid.length];
-    	for (int i = 0; i<cache.length; i++)
-    		cache[i] = 0;
-    	for (int x = grid.length -1; x >= 0; x--) {
-    		update_cache(cache, x);
-    		int width = 0;
-    		for (int y = 0; y < grid.length; y++) {
-    			if (cache[y] > width) { //open rectangle?
-    				partail_rect.push(new NewRect(y, width));
-    				width = cache[y];
-    			}
-    			else if (cache[y] < width) { //close rectangle?
-    				NewRect popped;
-    				do {
-                        if( partail_rect.size() == 0 ) {
-                            System.out.println("problem");
-                        }
-    					popped = partail_rect.pop();
-    					Rect newRect = new Rect(x,popped.y,x+width-1,y-1);
-                        if( newRect.area() < RECTANGLE_THRESHOLD || newRect.urx - newRect.llx == 1 || newRect.ury - newRect.lly == 1 )
-                            break;
-    					if (bestFound.empty()) {
-    						bestFound.push(newRect);
-    					}
-    					else {
-	    					Rect lastRect = bestFound.peek();
-	    					if (lastRect.interesect(newRect)) { //does this take any cells used by the last rectangle we found?
-	    						if (lastRect.area() < newRect.area()) {
-	    							bestFound.pop();
-	    							bestFound.push(newRect);
-	    						}
-	    					}
-	    					else {
-	    						bestFound.push(newRect);//we can always push
-	    					}
-    					}
-    					width = popped.width;
-    				} while (cache[y] < width);
-    				
-    				width = cache[y];
-    				if (width != 0) {
-    					partail_rect.push(new NewRect(popped.y,width));//re-push
-    				}
-    			}
-    		}
+    	
+    	while (true) {
+			boolean noneFound = true;
+			Stack<NewRect> partail_rect = new Stack<NewRect>();
+			
+			for (int i = 0; i<cache.length; i++)
+				cache[i] = 0;
+			for (int x = grid.length -1; x >= 0; x--) {
+				update_cache(blackWhiteGrid,cache, x);
+				int width = 0;
+				for (int y = 0; y < grid.length; y++) {
+					if (cache[y] > width) { //open rectangle?
+						partail_rect.push(new NewRect(y, width));
+						width = cache[y];
+					}
+					if (cache[y] < width) { //close rectangle?
+						NewRect popped;
+						do {
+		                    if( partail_rect.size() == 0 ) {
+		                    	popped = new NewRect(y,width);
+		                        break;
+		                    }
+							popped = partail_rect.pop();
+							Rect newRect = new Rect(x,popped.y,x+width-1,y-1);
+		                    if( newRect.area() < RECTANGLE_THRESHOLD || newRect.urx - newRect.llx == 1 || newRect.ury - newRect.lly == 1 )
+		                        break;
+							if (noneFound) {
+								bestFound.push(newRect);
+								noneFound = false;
+							}
+							else {
+		    					Rect lastRect = bestFound.peek();
+		//	    					if (lastRect.interesect(newRect)) { //does this take any cells used by the last rectangle we found?
+		    						if (lastRect.area() < newRect.area()) {
+		    							bestFound.pop();
+		    							bestFound.push(newRect);
+		    						}
+		//	    					}
+		//	    					else {
+		//	    						bestFound.push(newRect);//we can always push
+		//	    					}
+							}
+							width = popped.width;
+						} while (cache[y] < width);
+						
+						width = cache[y];
+						if (width != 0) {
+							partail_rect.push(new NewRect(popped.y,width));//re-push
+						}
+					}
+				}
+			}
+			if (noneFound)
+				break;
+			
+			clearFoundRectangle(blackWhiteGrid, bestFound.peek());
     	}
     	
     	//add found rectanlges
@@ -117,18 +141,46 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     		corners.add(new Point2D.Double(aRect.urx-grid.length/2,aRect.ury-grid.length/2));
     		obstacles.add(new Obstacle(corners));
     	}
+    	
     }
     
-//    private boolean[][] blackWhiteGrid(){
-//    	boolean[][] toReturn = new boolean[grid.length][grid.length];
-//    	for 
-//    	
-//    	return toReturn;
-//    }
+    private void clearFoundRectangle(boolean[][] blackWhiteGrid, Rect rect) {
+		for (int x = rect.llx; x < rect.urx+1; x++)
+			for (int y = rect.lly; y < rect.ury+1; y++)
+				blackWhiteGrid[x][y] = false;
+		
+	}
 
-    private void update_cache(int[] cache, int x) {
+	private boolean[][] getBlackWhiteGrid(){
+    	boolean[][] toReturn = new boolean[grid.length][grid.length];
+    	for (int x = 0; x < grid.length; x++)
+    		for (int y = 0; y < grid.length; y++) {
+    			if (grid[x][y] > BEL_THRESH) {
+    				toReturn[x][y] = true;
+    			}
+    			else {
+    				double sum = 0;
+    				for (int i = Math.max(x-5,0); i < Math.min(x+6,grid.length); i++) {
+    					sum += grid[i][y];
+    				}
+    				toReturn[x][y] = .6 < (sum/11);
+    			}
+    		}
+    	
+    	
+//    	for (int x = 0; x < 400; x++) {
+//    		for (int y = 0; y < 400; y++) {
+//    			System.out.print(toReturn[x][y]?"1":"0");
+//    		}
+//    		System.out.println();
+//    	}
+    	
+    	return toReturn;
+    }
+
+    private void update_cache(boolean[][] grid, int[] cache, int x) {
 		for (int y = 0; y < grid.length; y++) {
-			if (grid[x][y] > BEL_THRESH) {
+			if (grid[x][y]) {
 				cache[y] += 1;
 			}
 			else {

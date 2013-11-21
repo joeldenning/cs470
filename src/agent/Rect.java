@@ -17,6 +17,7 @@ public class Rect {
 	}
 
 	public boolean interesect(Rect newRect) {
-        return (newRect.llx <= this.urx || this.llx <= newRect.urx) && (newRect.lly <= this.ury || this.lly <= newRect.ury);
+        return ((newRect.llx <= this.urx && newRect.urx >= this.llx) || (this.llx <= newRect.urx && this.urx >= newRect.llx)) &&
+        		((newRect.lly <= this.ury && newRect.ury >= this.lly) || (this.lly <= newRect.ury && this.ury >= newRect.lly));
 	}
 }
