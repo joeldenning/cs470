@@ -1,5 +1,6 @@
 package agent;
 
+import agent.gridvisualization.GridVisualizationThread;
 import environment.Action;
 import environment.AttemptedAction;
 import environment.Environment;
@@ -17,11 +18,15 @@ import java.util.*;
  */
 public class GridFilterControllerAgent extends GridFilterAgent {
 
+    private static final int RECTANGLE_THRESHOLD = 10;
     protected Set<Obstacle> obstacles = new HashSet<Obstacle>();
     private static double BEL_THRESH = 0.7;
+	private GridVisualizationThread gridVisualizationThread;
 
     public GridFilterControllerAgent(int tankIndex) {
         super(tankIndex);
+	    gridVisualizationThread = new GridVisualizationThread();
+	    gridVisualizationThread.start();
     }
 
     @Override
@@ -43,7 +48,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     @Override
     public void processAttemptedActions(List<AttemptedAction> attemptedActions) {
         analyzeForObstacles();
-        updateOpenGL();
+        updateVisualization();
     }
 
     private void analyzeForObstacles() {
@@ -68,15 +73,20 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     			else if (cache[y] < width) { //close rectangle?
     				NewRect popped;
     				do {
+                        if( partail_rect.size() == 0 ) {
+                            System.out.println("problem");
+                        }
     					popped = partail_rect.pop();
     					Rect newRect = new Rect(x,popped.y,x+width-1,y-1);
+                        if( newRect.area() < RECTANGLE_THRESHOLD || newRect.urx - newRect.llx == 1 || newRect.ury - newRect.lly == 1 )
+                            break;
     					if (bestFound.empty()) {
     						bestFound.push(newRect);
     					}
     					else {
 	    					Rect lastRect = bestFound.peek();
 	    					if (lastRect.interesect(newRect)) { //does this take any cells used by the last rectangle we found?
-	    						if (lastRect.area() < width*(y-popped.y)) {
+	    						if (lastRect.area() < newRect.area()) {
 	    							bestFound.pop();
 	    							bestFound.push(newRect);
 	    						}
@@ -127,8 +137,8 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 		}
 	}
 
-	private void updateOpenGL() {
-        //TODO Joel
+	private void updateVisualization() {
+        gridVisualizationThread.updateGrid(grid);
     }
     
 }

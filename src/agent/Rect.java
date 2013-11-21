@@ -17,7 +17,6 @@ public class Rect {
 	}
 
 	public boolean interesect(Rect newRect) {
-		// TODO Auto-generated method stub
-		return false;
+        return (newRect.llx <= this.urx || this.llx <= newRect.urx) && (newRect.lly <= this.ury || this.lly <= newRect.ury);
 	}
 }

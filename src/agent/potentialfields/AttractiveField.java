@@ -4,6 +4,8 @@ import environment.Base;
 import environment.Flag;
 import environment.Tank;
 
+import java.awt.geom.Point2D;
+
 /**
  * Created with IntelliJ IDEA.
  * User: jbdennin
@@ -25,6 +27,13 @@ public class AttractiveField extends PotentialField {
         radius = 1;//What should this be?
         goalX = flag.getX();
         goalY = flag.getY();
+        alpha = FLAG_CONST;
+    }
+
+    public AttractiveField(Point2D point, Tank myself) {
+        super(myself);
+        goalX = point.getX();
+        goalY = point.getY();
         alpha = FLAG_CONST;
     }
 
