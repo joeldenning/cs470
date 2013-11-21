@@ -31,7 +31,8 @@ public class GridComponent extends JPanel {
                         Color gray = new Color(rgb, rgb, rgb);
                         g.setColor(gray);
                         int pixelX = ZOOM_FACTOR * x;
-                        int pixelY = ZOOM_FACTOR * y;
+                        int pixelY = 800 - ZOOM_FACTOR * y;
+//                        System.out.println("probability = "+grid[x][y]+", rgb = "+rgb);
                         g.drawRect(pixelX, pixelY, ZOOM_FACTOR, ZOOM_FACTOR);
                     }
                 }

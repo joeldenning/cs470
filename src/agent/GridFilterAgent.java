@@ -14,14 +14,17 @@ import java.util.*;
 public class GridFilterAgent extends AbstractAgent {
 
 	private static final long MAX_STATE_DURATION = 5000l;
+    private static final double VX_THRESHOLD = 0.1;
+    private static final double VY_THRESHOLD = 0.1;
     protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
-    protected double truePositive, trueNegative;
+    protected static double truePositive, trueNegative;
 	private Random rand = new Random();
 
 	private State state = State.TURNING;
 	private long nextStateChange = -1;
+    private boolean moving = false;
 
     public GridFilterAgent(int tankIndex) {
         super(tankIndex);
@@ -43,24 +46,32 @@ public class GridFilterAgent extends AbstractAgent {
 			    case TURNING:
 				    state = State.STRAIGHT;
 				    actions.add(new Action(this, Action.Type.ANGVEL, "0"));
+                    nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION);
 				    break;
 			    case STRAIGHT:
-				    state = State.TURNING;
-				    String angVel;
-				    if( rand.nextBoolean() )
-					    angVel = "1.0";
-				    else
-				        angVel = "-1.0";
-				    actions.add(new Action(this, Action.Type.ANGVEL, angVel));
-				    break;
+				    turn(actions, curTime);
+                    break;
 		    }
-		    if( nextStateChange < 0 ) {
+		    if( !moving ) {
 			    //first time
 			    actions.add(new Action(this, Action.Type.SPEED, "1.0"));
+                moving = true;
 		    }
-		    nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION);
-	    }
+	    } else if( environment.getMyState().getVx() < VX_THRESHOLD && environment.getMyState().getVy() < VY_THRESHOLD ) {
+            turn(actions, curTime);
+        }
         return actions;
+    }
+
+    private void turn(List<Action> actions, long curTime) {
+        state = State.TURNING;
+        String angVel;
+        if( rand.nextBoolean() )
+            angVel = "1.0";
+        else
+            angVel = "-1.0";
+        actions.add(new Action(this, Action.Type.ANGVEL, angVel));
+        nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION / 4);
     }
 
     private void updateGrid(Environment environment) {
