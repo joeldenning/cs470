@@ -164,6 +164,11 @@ public class PotentialFieldsAgent extends AbstractAgent {
         return desiredEnvironment;
 	}
 
+    @Override
+    public long getNextStateChange() {
+        return System.currentTimeMillis();
+    }
+
     public void findState(Environment environment) {
         if( !environment.getMyState().getFlag().equalsIgnoreCase(environment.getMyTeamColor())
                 && !environment.getMyState().getFlag().equalsIgnoreCase("-"))

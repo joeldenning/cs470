@@ -28,6 +28,8 @@ public abstract class AbstractAgent {
 	 */
 	public abstract Map<Environment.Component, Collection<String>> desiredEnvironment();
 
+    public abstract long getNextStateChange();
+
     protected Action createAction(Type type, String value) {
         return new Action(this, type, value);
     }

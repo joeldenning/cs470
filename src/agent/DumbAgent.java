@@ -84,7 +84,12 @@ public class DumbAgent extends AbstractAgent {
 		return desiredEnvironment;
 	}
 
-	private void slowingRotation() {
+    @Override
+    public long getNextStateChange() {
+        return nextStateChange;
+    }
+
+    private void slowingRotation() {
         state = State.MOVING_FORWARD;
         nextStateChange = System.currentTimeMillis() + 3000l + random.nextLong() % 5000;
     }

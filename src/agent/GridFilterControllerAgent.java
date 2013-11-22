@@ -25,10 +25,9 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 	private GridVisualizationThread gridVisualizationThread;
 	private int cycleCount;
 
-    public GridFilterControllerAgent(int tankIndex) {
+    public GridFilterControllerAgent(int tankIndex, GridVisualizationThread gridVisualizationThread) {
         super(tankIndex);
-	    gridVisualizationThread = new GridVisualizationThread();
-	    gridVisualizationThread.start();
+	    this.gridVisualizationThread = gridVisualizationThread;
 	    cycleCount = 0;
     }
 
@@ -135,7 +134,12 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     	obstacles.addAll(bestFound);
     	
     }
-    
+
+    @Override
+    public long getNextStateChange() {
+        return System.currentTimeMillis();
+    }
+
     private void clearFoundRectangle(boolean[][] blackWhiteGrid, Rect rect) {
 		for (int x = rect.llx; x < rect.urx+1; x++)
 			for (int y = rect.lly; y < rect.ury+1; y++)
