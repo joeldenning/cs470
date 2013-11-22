@@ -5,6 +5,7 @@ import environment.Action;
 import environment.AttemptedAction;
 import environment.Environment;
 import environment.Obstacle;
+import environment.Flag;
 
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -30,6 +31,8 @@ public class GridFilterControllerAgent extends GridFilterAgent {
         super(tankIndex);
 	    this.gridVisualizationThread = gridVisualizationThread;
 	    cycleCount = 0;
+	    obstaclesF = new ArrayList<Obstacle>();
+	    toExplore = new ArrayList<Flag>();
     }
 
     @Override
@@ -121,6 +124,23 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     	System.out.println("Sweep done:");
     	for (Rect r : bestFound){
     		System.out.println("Rect: llx=" + (r.llx-400) + "\tlly=" + (r.lly-400) + "\turx=" + (r.urx-400) + "\tury=" + (r.ury-400));
+    		List<Point2D.Double> corners = new ArrayList<Point2D.Double>();
+    		corners.add(new Point2D.Double((r.llx-400),(r.lly-400)));
+    		corners.add(new Point2D.Double((r.llx-400),(r.ury-400)));
+    		corners.add(new Point2D.Double((r.urx-400),(r.lly-400)));
+    		corners.add(new Point2D.Double((r.urx-400),(r.ury-400)));
+    		obstaclesF.add(new Obstacle(corners));
+    	}
+    	
+    	toExplore.clear();
+    	int i = 0;
+    	Random rand = new Random();
+    	while (toExplore.size() < 10 && i < 1000) {
+    		int x = rand.nextInt(grid.length);
+    		int y = rand.nextInt(grid.length);
+    		if (grid[x][y] == .5) {
+    			toExplore.add(new Flag("blue",x,y));
+    		}
     	}
     }
     /*

@@ -15,6 +15,8 @@ public class GridFilterAgent extends AbstractAgent {
 
 	private static final long MAX_STATE_DURATION = 5000l;
     private static final double VELOCITY_THRESHOLD = 0.19;
+    protected static List<Obstacle> obstaclesF;
+    protected static List<Flag> toExplore;
     protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
