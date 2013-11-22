@@ -72,7 +72,7 @@ public class GridFilterAgent extends AbstractAgent {
 
     private void turn(List<Action> actions, long curTime, boolean clockwise, boolean sharp) {
         state = State.TURNING;
-        String angVel = sharp ? "1" : ".5";
+        String angVel = sharp ? ".7" : ".5";
         if( !clockwise )
             angVel = "-"+angVel;
         actions.add(new Action(this, Action.Type.ANGVEL, angVel));
