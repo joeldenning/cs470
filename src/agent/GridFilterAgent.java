@@ -14,7 +14,7 @@ import java.util.*;
 public class GridFilterAgent extends AbstractAgent {
 
 	private static final long MAX_STATE_DURATION = 5000l;
-    private static final double VELOCITY_THRESHOLD = 0.2;
+    private static final double VELOCITY_THRESHOLD = 0.19;
     protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
