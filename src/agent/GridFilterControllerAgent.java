@@ -22,7 +22,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     protected Set<Rect> obstacles = new HashSet<Rect>();
     private static double BEL_THRESH = 0.7;
     private static int WAIT_CYCLE = 10;
-    private static int BLIND_REACH = 75;
+    private static int BLIND_REACH = 90;
 	private GridVisualizationThread gridVisualizationThread;
 	private int cycleCount;
 
@@ -80,16 +80,16 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 				cache[i] = 0;
 			for (int llx = grid.length -1; llx >= 0; llx--) {
 				update_cache(blackWhiteGrid,cache, llx);
-				for (int lly = 1; lly < grid.length; lly++) {
+				for (int lly = 0; lly < grid.length; lly++) {
 					Rect bestOfRound = new Rect(llx,lly,llx,lly);
-					int y = lly-1;
+					int y = lly;
 					int x_max = 9999;
 					int x = llx;
 					while (y+1<grid.length && blackWhiteGrid[llx][y]) {
 						y++;
 						x = Math.min(llx+cache[y]-1, x_max);
 						x_max = x;
-						Rect tryRect = new Rect(llx,lly,x,y);
+						Rect tryRect = new Rect(llx,lly-1,x,y);
 						if (tryRect.area() > bestOfRound.area()) {
 							bestOfRound = tryRect;
 						}
@@ -233,11 +233,15 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     				toReturn[x][y] = true;
     			}
     			else {
-    				double sum = 0;
-    				for (int i = Math.max(x-5,0); i < Math.min(x+6,grid.length); i++) {
-    					sum += grid[i][y];
+    				double sumX = 0;
+    				double sumY = 0;
+    				for (int xx = Math.max(x-5,0); xx < Math.min(x+6,grid.length); xx++) {
+    					sumX += grid[xx][y]>BEL_THRESH?1:0;
     				}
-    				toReturn[x][y] = .6 < (sum/11);
+    				for (int j = Math.max(y-5,0); j < Math.min(y+6,grid.length); j++) {
+						sumY += grid[x][j]>BEL_THRESH?1:0;
+    				}
+    				toReturn[x][y] = BEL_THRESH < (sumX/2) && BEL_THRESH < (sumY/2);
     				
     				//We assume if we are surrounded by black, then we are black (if unexplored)
     				if (grid[x][y] == .5 && !toReturn[x][y]) {
@@ -282,8 +286,8 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     			}
     		}
     	}
-//    	for (int x = 0; x < 400; x++) {
-//    		for (int y = 0; y < 400; y++) {
+//    	for (int y = 400-70; y < 400+70; y++){
+//    		 for (int x = 400-20; x < 20+400; x++) {
 //    			System.out.print(toReturn[x][y]?"1":"0");
 //    		}
 //    		System.out.println();
