@@ -14,7 +14,7 @@ import java.util.*;
 public class GridFilterAgent extends AbstractAgent {
 
 	private static final long MAX_STATE_DURATION = 5000l;
-    private static final double VELOCITY_THRESHOLD = 0.19;
+    private static final double VELOCITY_THRESHOLD = 30;
     protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
@@ -35,19 +35,14 @@ public class GridFilterAgent extends AbstractAgent {
 
     @Override
     public List<Action> getActions(Environment environment) {
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new Action(this, Action.Type.SPEED, "1"));
         if( grid == null )
             return new ArrayList<Action>();
         updateGrid(environment);
-	    List<Action> actions = new ArrayList<Action>();
 	    long curTime = System.currentTimeMillis();
-        if( environment.getMyState().getVx() < VELOCITY_THRESHOLD && environment.getMyState().getVy() < VELOCITY_THRESHOLD ) {
-            if (environment.getMyState().getVx() != 0 || environment.getMyState().getVy() != 0) {
-                turn(actions, curTime, true, true);
-                return actions;
-            }
-        }
         if( curTime >= nextStateChange ) {
-		    switch( state ) {
+            switch( state ) {
 			    case TURNING:
 				    state = State.STRAIGHT;
 				    actions.add(new Action(this, Action.Type.ANGVEL, "0"));
@@ -57,26 +52,22 @@ public class GridFilterAgent extends AbstractAgent {
 				    turn(actions, curTime);
                     break;
 		    }
-		    if( !moving ) {
-			    //first time
-			    actions.add(new Action(this, Action.Type.SPEED, "1.0"));
-                moving = true;
-		    }
 	    }
         return actions;
     }
 
     private void turn(List<Action> actions, long curTime) {
-        turn( actions, curTime, rand.nextBoolean(), false );
+        turn(actions, curTime, rand.nextBoolean(), false);
+        nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION);
     }
 
     private void turn(List<Action> actions, long curTime, boolean clockwise, boolean sharp) {
         state = State.TURNING;
-        String angVel = sharp ? ".7" : ".5";
+        String angVel = sharp ? "1" : ".5";
         if( !clockwise )
             angVel = "-"+angVel;
         actions.add(new Action(this, Action.Type.ANGVEL, angVel));
-        nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION / 15);
+        int durationFactor = sharp ? 1 : 3;
     }
 
     private void updateGrid(Environment environment) {
