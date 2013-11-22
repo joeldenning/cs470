@@ -14,8 +14,7 @@ import java.util.*;
 public class GridFilterAgent extends AbstractAgent {
 
 	private static final long MAX_STATE_DURATION = 5000l;
-    private static final double VX_THRESHOLD = 0.1;
-    private static final double VY_THRESHOLD = 0.1;
+    private static final double VELOCITY_THRESHOLD = 0.2;
     protected static double[][] grid;//the probablilty that a cell is occupied
 
     private Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
@@ -41,7 +40,13 @@ public class GridFilterAgent extends AbstractAgent {
         updateGrid(environment);
 	    List<Action> actions = new ArrayList<Action>();
 	    long curTime = System.currentTimeMillis();
-	    if( curTime >= nextStateChange ) {
+        if( environment.getMyState().getVx() < VELOCITY_THRESHOLD && environment.getMyState().getVy() < VELOCITY_THRESHOLD ) {
+            if (environment.getMyState().getVx() != 0 || environment.getMyState().getVy() != 0) {
+                turn(actions, curTime, true, true);
+                return actions;
+            }
+        }
+        if( curTime >= nextStateChange ) {
 		    switch( state ) {
 			    case TURNING:
 				    state = State.STRAIGHT;
@@ -57,19 +62,19 @@ public class GridFilterAgent extends AbstractAgent {
 			    actions.add(new Action(this, Action.Type.SPEED, "1.0"));
                 moving = true;
 		    }
-	    } else if( environment.getMyState().getVx() < VX_THRESHOLD && environment.getMyState().getVy() < VY_THRESHOLD ) {
-            turn(actions, curTime);
-        }
+	    }
         return actions;
     }
 
     private void turn(List<Action> actions, long curTime) {
+        turn( actions, curTime, rand.nextBoolean(), false );
+    }
+
+    private void turn(List<Action> actions, long curTime, boolean clockwise, boolean sharp) {
         state = State.TURNING;
-        String angVel;
-        if( rand.nextBoolean() )
-            angVel = "1.0";
-        else
-            angVel = "-1.0";
+        String angVel = sharp ? "1" : ".7";
+        if( !clockwise )
+            angVel = "-"+angVel;
         actions.add(new Action(this, Action.Type.ANGVEL, angVel));
         nextStateChange = curTime + (rand.nextLong() % MAX_STATE_DURATION / 4);
     }
@@ -111,7 +116,12 @@ public class GridFilterAgent extends AbstractAgent {
         return desiredEnvironment;
     }
 
-	private enum State {
+    @Override
+    public long getNextStateChange() {
+        return nextStateChange;
+    }
+
+    private enum State {
 		STRAIGHT, TURNING
 	}
 }

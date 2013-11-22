@@ -1,6 +1,7 @@
 package controller;
 
 import agent.*;
+import agent.gridvisualization.GridVisualizationThread;
 import environment.AttemptedAction;
 import communicator.Communicator;
 import environment.Action;
@@ -21,12 +22,17 @@ public class Controller extends Thread {
         communicator = new Communicator(args[0], Integer.parseInt(args[1]), args[2]);
         init();
         GridFilterControllerAgent controllerAgent = null;
-        if( numOfAgents > 0 ) {
-            controllerAgent = new GridFilterControllerAgent(0);
-            Controller controller = new Controller(controllerAgent);
-            controller.start();
+        final int numOfControllerAgents = 1;
+        if (numOfAgents > 0) {
+            GridVisualizationThread gridVisualizationThread = new GridVisualizationThread();
+            gridVisualizationThread.start();
+            for (int i = 0; i < Math.min(numOfControllerAgents, numOfAgents); i++) {
+                controllerAgent = new GridFilterControllerAgent(i, gridVisualizationThread);
+                Controller controller = new Controller(controllerAgent);
+                controller.start();
+            }
         }
-        for( int i=1; i<numOfAgents; i++ ) {
+        for( int i=numOfControllerAgents; i<numOfAgents; i++ ) {
             Controller controller = new Controller(new GridFilterAgent(i));
             controller.start();
         }
@@ -59,13 +65,18 @@ public class Controller extends Thread {
                 resultsOfActions.add(new AttemptedAction(action, false));
 		}
         agent.processAttemptedActions(resultsOfActions);
-	}
+        try {
+            Thread.sleep(Math.max(0, agent.getNextStateChange() - System.currentTimeMillis()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
 
     @Override
     public void run() {
-        while(true) {
+        while (true) {
             Environment environment = communicator.getEnvironment(agent);
-            if( environment.getMyState().getStatus() == Tank.Status.alive || true )
+            if (environment.getMyState().getStatus() == Tank.Status.alive || true)
                 goToGoal(environment);
             else
                 break;
