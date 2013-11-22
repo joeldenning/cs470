@@ -94,7 +94,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 							bestOfRound = tryRect;
 						}
 					}
-					if (bestOfRound.area() > 20) {
+					if (bestOfRound.area() > 40) {
 						if (noneFound) {
 							bestFound.push(bestOfRound);
 							noneFound = false;
