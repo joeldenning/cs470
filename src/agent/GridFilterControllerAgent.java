@@ -19,7 +19,7 @@ import java.util.*;
 public class GridFilterControllerAgent extends GridFilterAgent {
 
     private static final int RECTANGLE_THRESHOLD = 15;
-    protected Set<Obstacle> obstacles = new HashSet<Obstacle>();
+    protected Set<Rect> obstacles = new HashSet<Rect>();
     private static double BEL_THRESH = 0.7;
     private static int WAIT_CYCLE = 10;
 	private GridVisualizationThread gridVisualizationThread;
@@ -118,9 +118,9 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 						} while (cache[y] < width);
 						
 						width = cache[y];
-						if (width != 0) {
-							partail_rect.push(new NewRect(popped.y,width));//re-push
-						}
+//						if (width != 0) {
+//							partail_rect.push(new NewRect(popped.y,width));//re-push
+//						}
 					}
 				}
 			}
@@ -132,15 +132,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     	
     	//add found rectanlges
     	obstacles.clear();
-    	while (!bestFound.empty()) {
-    		Rect aRect = bestFound.pop();
-    		List<Point2D.Double> corners = new ArrayList<Point2D.Double>();
-    		corners.add(new Point2D.Double(aRect.llx-grid.length/2,aRect.lly-grid.length/2));
-    		corners.add(new Point2D.Double(aRect.urx-grid.length/2,aRect.lly-grid.length/2));
-    		corners.add(new Point2D.Double(aRect.llx-grid.length/2,aRect.ury-grid.length/2));
-    		corners.add(new Point2D.Double(aRect.urx-grid.length/2,aRect.ury-grid.length/2));
-    		obstacles.add(new Obstacle(corners));
-    	}
+    	obstacles.addAll(bestFound);
     	
     }
     
@@ -190,7 +182,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 	}
 
 	private void updateVisualization() {
-        gridVisualizationThread.updateGrid(grid);
+        gridVisualizationThread.update(grid, obstacles);
     }
     
 }

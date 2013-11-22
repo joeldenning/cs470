@@ -1,7 +1,12 @@
 package agent.gridvisualization;
 
+import agent.Rect;
+import environment.Obstacle;
+
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,8 +36,9 @@ public class GridVisualizationThread extends Thread {
 		frame.setVisible(true);
 	}
 
-	public synchronized void updateGrid(double[][] grid) {
+	public synchronized void update(double[][] grid, Set<Rect> obstacles) {
 		gridComponent.setGrid(grid);
+        gridComponent.setObstacles(obstacles);
 		frame.repaint();
 	}
 }

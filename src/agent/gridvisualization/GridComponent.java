@@ -1,7 +1,10 @@
 package agent.gridvisualization;
 
+import agent.Rect;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,9 +16,10 @@ import java.awt.*;
 public class GridComponent extends JPanel {
 
 	private double[][] grid;
-    private static final int ZOOM_FACTOR = 1;
+    private Set<Rect> obstacles, lastObstacles;
+    private boolean obstaclesChanged = false;
 
-	public void setGrid(double[][] grid) {
+    public void setGrid(double[][] grid) {
 		this.grid = grid;
 	}
 
@@ -30,13 +34,32 @@ public class GridComponent extends JPanel {
                         int rgb = (int) Math.round(inverseProb * 255d);
                         Color gray = new Color(rgb, rgb, rgb);
                         g.setColor(gray);
-                        int pixelX = ZOOM_FACTOR * x;
-                        int pixelY = 800 - ZOOM_FACTOR * y;
 //                        System.out.println("probability = "+grid[x][y]+", rgb = "+rgb);
-                        g.drawRect(pixelX, pixelY, ZOOM_FACTOR, ZOOM_FACTOR);
+                        g.drawRect(x, 800-y, 1, 1);
                     }
                 }
             }
         }
+        if (obstaclesChanged) {
+            obstaclesChanged = false;
+            if (lastObstacles != null) {
+                g.setColor(Color.BLACK);
+                for (Rect obstacle : lastObstacles) {
+                    g.drawRect(obstacle.llx, 800 - obstacle.ury, obstacle.urx - obstacle.llx, obstacle.ury - obstacle.lly);
+                }
+            }
+            if (obstacles != null) {
+                g.setColor(Color.GREEN);
+                for (Rect obstacle : obstacles) {
+                    g.drawRect(obstacle.llx, 800 - obstacle.ury, obstacle.urx - obstacle.llx, obstacle.ury - obstacle.lly);
+                }
+            }
+        }
+    }
+
+    public void setObstacles(Set<Rect> obstacles) {
+        lastObstacles = this.obstacles;
+        this.obstacles = obstacles;
+        obstaclesChanged = true;
     }
 }

@@ -1,7 +1,9 @@
 package agent.gridvisualization;
 
+import agent.Rect;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -25,7 +27,7 @@ public class GridVisualizationThreadTest {
                 grid[x][y] = rand.nextDouble();
 			}
 		}
-		thread.updateGrid(grid);
+		thread.update(grid, new HashSet<Rect>());
 		while( true ) {}
 	}
 }
