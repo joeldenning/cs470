@@ -55,6 +55,7 @@ public class GridComponent extends JPanel {
                 }
             }
         }
+        
     }
 
     public void setObstacles(Set<Rect> obstacles) {
