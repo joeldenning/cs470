@@ -21,7 +21,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
 
     private static final int RECTANGLE_THRESHOLD = 15;
     protected Set<Rect> obstacles = new HashSet<Rect>();
-    private static double BEL_THRESH = 0.7;
+    private static double BEL_THRESH = 0.75;
     private static int WAIT_CYCLE = 10;
     private static int BLIND_REACH = 90;
 	private GridVisualizationThread gridVisualizationThread;
@@ -241,6 +241,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     private void clearFoundRectangle(boolean[][] blackWhiteGrid, Rect rect) {
 		for (int x = rect.llx; x < rect.urx+1; x++)
 			for (int y = rect.lly; y < rect.ury+1; y++)
+				if (x > -1 && y > -1)
 				blackWhiteGrid[x][y] = false;
 		
 	}
