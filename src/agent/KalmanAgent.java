@@ -73,47 +73,50 @@ public class KalmanAgent extends AbstractAgent {
 //        long millisUntilBulletHitsTank = whenWillBulletHitTank(environment.getMyState());
         double time_to_delay;
         double intersection_time;
-        calculateIntersection(environment.getMyState(),&time_to_delay, &intersection_time);
+        double intersection_result[] = calculateIntersection(environment.getMyState());
+        time_to_delay = intersection_result[0];
+        intersection_time = intersection_result[1];
 //        if( millisUntilTankInCrosshairs < 0 || millisUntilTankInCrosshairs > WAITING_FOR_PERFECT_SHOT_MAX_TIME
 //                || millisUntilBulletHitsTank < 0) {
 //            actions.add(getTurningAction(environment.getMyState()));
 //        } else if( millisUntilTankInCrosshairs - millisUntilBulletHitsTank < SHOOTING_THRESHOLD )
 //            actions.add(new Action(this, Action.Type.SHOOT, ""));
-        if( intersection_time < 0 && time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
+        if(  intersection_time < 0 || time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
             actions.add(getTurningAction(environment.getMyState()));
-        } else if( intersection_time-time_to_delay < SHOOTING_THRESHOLD )
-        	actions.add(new Action(this, Action.Type.ANGVEL, "0"));
+        } else if( time_to_delay < SHOOTING_THRESHOLD ) {
             actions.add(new Action(this, Action.Type.SHOOT, ""));
+        } else {
+            actions.add(new Action(this, Action.Type.ANGVEL, "0"));
+        }
         return actions;
     }
-    
-    private void calculateIntersection(Tank myState, double* return_delay, double* return_intersection) {
-    	*return_delay = -1;
-    	*return_intersection = -1;
-    	double bullet_vy = Math.sin(myState.getAngle()) * shot_v;
-    	double bullet_vx = Math.cos(myState.getAngle()) * shot_v;
-    	double c = enemyState.get(0,3) - myState.getY() + (-1*bullet_vy/bullet_vx)*(enemyState.get(0,0)-myState.getX());
-    	double b = (-1*bullet_vy/bullet_vx) * (enemyState.get(0,1)-bullet_vx) + enemyState.get(0,4) - bullet_vy;
-    	double a = (-1*bullet_vy/bullet_vx) * enemyState.get(0,2) + enemyState.get(0,5);
-    	//quadratic formula
-    	if (b*b - 4 * a * c > 0)
-    	{
-	    	double res1 = (-1*b + Math.sqrt(b*b - 4 * a * c))/(2*a);
-	    	double res2 = (-1*b - Math.sqrt(b*b - 4 * a * c))/(2*a);
-	    	double time = Math.max(res1,res2);
-	    	if (time < 0)
-	    		return toReturn;
-	    	
-	    	//substitute back in to solve for second variable
-	    	double delay = ( (enemyState.get(0,0) - myState.getX()) + (time*(enemyState.get(0,1)-bullet_vx)) + (time*time*enemyState.get(0,2)) )/(-1*bullet_vx);
-	    	if (delay < 0)
-	    		return;
-	    	
-	    	*return_delay = delay;
-	    	*return_intersection = time;
-    	}
-    	
-    	return toReturn;
+
+    private double[] calculateIntersection(Tank myState) {
+        double toReturn[] = {-1, -1};
+        double bullet_vy = Math.sin(myState.getAngle()) * shot_v;
+        double bullet_vx = Math.cos(myState.getAngle()) * shot_v;
+        double c = enemyState.get(0,3) - myState.getY() + (-1*bullet_vy/bullet_vx)*(enemyState.get(0,0)-myState.getX());
+        double b = (-1*bullet_vy/bullet_vx) * (enemyState.get(0,1)-bullet_vx) + enemyState.get(0,4) - bullet_vy;
+        double a = (-1*bullet_vy/bullet_vx) * enemyState.get(0,2) + enemyState.get(0,5);
+        //quadratic formula
+        if (b*b - 4 * a * c > 0)
+        {
+            double res1 = (-1*b + Math.sqrt(b*b - 4 * a * c))/(2*a);
+            double res2 = (-1*b - Math.sqrt(b*b - 4 * a * c))/(2*a);
+            double time = Math.max(res1,res2);
+            if (time < 0)
+                return toReturn;
+
+            //substitute back in to solve for second variable
+            double delay = ( (enemyState.get(0,0) - myState.getX()) + (time*(enemyState.get(0,1)-bullet_vx)) + (time*time*enemyState.get(0,2)) )/(-1*bullet_vx);
+            if (delay < 0)
+                return toReturn;
+
+            toReturn[0] = delay;
+            toReturn[1] = time;
+        }
+
+        return toReturn;
     }
     
     private long whenWillBulletHitTank(Tank myState) {
@@ -129,7 +132,7 @@ public class KalmanAgent extends AbstractAgent {
     public Point getEnemyPosition(long millisIntoFuture) {
         double x = enemyState.get(0,0) + enemyState.get(0,1)*millisIntoFuture + enemyState.get(0,2)*millisIntoFuture*millisIntoFuture;
         double y = enemyState.get(0,3) + enemyState.get(0,4)*millisIntoFuture + enemyState.get(0,5)*millisIntoFuture*millisIntoFuture;
-        return new Point(x,y);
+        return new Point((int)x,(int)y);
     }
 
     private Action getTurningAction(Tank myState) {
