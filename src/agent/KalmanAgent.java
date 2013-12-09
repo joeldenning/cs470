@@ -22,7 +22,7 @@ public class KalmanAgent extends AbstractAgent {
     private static final double friction = 0.1;
     private static Map<State, String> teamToDuckMap = new HashMap<State, String>();
     private static final long WAITING_FOR_PERFECT_SHOT_MAX_TIME = 1000;
-    private static final double shot_v = 100;
+    private static final double shot_v = 2;//TODO I have no idea what this should actually be
 
     static {
         desiredEnvironment.put(Environment.Component.OTHER_TANKS, null);
@@ -36,7 +36,7 @@ public class KalmanAgent extends AbstractAgent {
     private Matrix sigmaSubT;
     private Matrix F;
 
-    public KalmanAgent(int tankIndex) {
+    protected KalmanAgent(int tankIndex) {
         super(tankIndex);
         double[] doubleState = { 0, 0, 0, 0, 0, 0 };
         enemyState = new Matrix(doubleState, 6);
@@ -73,26 +73,23 @@ public class KalmanAgent extends AbstractAgent {
 //        long millisUntilBulletHitsTank = whenWillBulletHitTank(environment.getMyState());
         double time_to_delay;
         double intersection_time;
-        double intersection_result[] = calculateIntersection(environment.getMyState());
-        time_to_delay = intersection_result[0];
-        intersection_time = intersection_result[1];
+        calculateIntersection(environment.getMyState(),&time_to_delay, &intersection_time);
 //        if( millisUntilTankInCrosshairs < 0 || millisUntilTankInCrosshairs > WAITING_FOR_PERFECT_SHOT_MAX_TIME
 //                || millisUntilBulletHitsTank < 0) {
 //            actions.add(getTurningAction(environment.getMyState()));
 //        } else if( millisUntilTankInCrosshairs - millisUntilBulletHitsTank < SHOOTING_THRESHOLD )
 //            actions.add(new Action(this, Action.Type.SHOOT, ""));
-        if(  intersection_time < 0 || time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
+        if( intersection_time < 0 && time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
             actions.add(getTurningAction(environment.getMyState()));
-        } else if( time_to_delay < SHOOTING_THRESHOLD ) {
-            actions.add(new Action(this, Action.Type.SHOOT, ""));
-        } else {
+        } else if( intersection_time-time_to_delay < SHOOTING_THRESHOLD )
         	actions.add(new Action(this, Action.Type.ANGVEL, "0"));
-        }
+            actions.add(new Action(this, Action.Type.SHOOT, ""));
         return actions;
     }
     
-    private double[] calculateIntersection(Tank myState) {
-    	double toReturn[] = {-1, -1};
+    private void calculateIntersection(Tank myState, double* return_delay, double* return_intersection) {
+    	*return_delay = -1;
+    	*return_intersection = -1;
     	double bullet_vy = Math.sin(myState.getAngle()) * shot_v;
     	double bullet_vx = Math.cos(myState.getAngle()) * shot_v;
     	double c = enemyState.get(0,3) - myState.getY() + (-1*bullet_vy/bullet_vx)*(enemyState.get(0,0)-myState.getX());
@@ -110,10 +107,10 @@ public class KalmanAgent extends AbstractAgent {
 	    	//substitute back in to solve for second variable
 	    	double delay = ( (enemyState.get(0,0) - myState.getX()) + (time*(enemyState.get(0,1)-bullet_vx)) + (time*time*enemyState.get(0,2)) )/(-1*bullet_vx);
 	    	if (delay < 0)
-	    		return toReturn;
+	    		return;
 	    	
-	    	toReturn[0] = delay;
-	    	toReturn[1] = time;
+	    	*return_delay = delay;
+	    	*return_intersection = time;
     	}
     	
     	return toReturn;
@@ -132,7 +129,7 @@ public class KalmanAgent extends AbstractAgent {
     public Point getEnemyPosition(long millisIntoFuture) {
         double x = enemyState.get(0,0) + enemyState.get(0,1)*millisIntoFuture + enemyState.get(0,2)*millisIntoFuture*millisIntoFuture;
         double y = enemyState.get(0,3) + enemyState.get(0,4)*millisIntoFuture + enemyState.get(0,5)*millisIntoFuture*millisIntoFuture;
-        return new Point((int)x,(int)y);
+        return new Point(x,y);
     }
 
     private Action getTurningAction(Tank myState) {
