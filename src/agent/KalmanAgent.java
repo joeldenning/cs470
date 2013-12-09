@@ -22,7 +22,7 @@ public class KalmanAgent extends AbstractAgent {
     private static final double friction = 0.1;
     private static Map<State, String> teamToDuckMap = new HashMap<State, String>();
     private static final long WAITING_FOR_PERFECT_SHOT_MAX_TIME = 1000;
-    private static final double shot_v = 2;//TODO I have no idea what this should actually be
+    private static final double shot_v = 100;
 
     static {
         desiredEnvironment.put(Environment.Component.OTHER_TANKS, null);
@@ -38,7 +38,7 @@ public class KalmanAgent extends AbstractAgent {
         super(tankIndex);
         double[] doubleState = { 0, 0, 0, 0, 0, 0 };
         enemyState = new Matrix(doubleState, 6);
-        double[][] dSigmaSubX = {
+        double[][] dSigmaSubT = {
                 {100,   0, 0,  0,   0,   0},
                 {0,   0.1, 0,  0,   0,   0},
                 {0,     0, 0.1,0,   0,   0},
@@ -62,8 +62,13 @@ public class KalmanAgent extends AbstractAgent {
                 {25, 0 },
                 {0 , 25}
         };
-        double[][] dSigmaSubT = {
-                {}
+        double[][] dSigmaSubX = {
+                {0.1,   0, 0,  0,   0,   0},
+                {0,   0.1, 0,  0,   0,   0},
+                {0,     0, 100,0,   0,   0},
+                {0,     0, 0,  0.1, 0,   0},
+                {0,     0, 0,  0,   0.1, 0},
+                {0,     0, 0,  0,   0, 100},
         };
         sigmaSubX = new Matrix(dSigmaSubX);
         sigmaSubZ = new Matrix(dSigmaSubZ);
@@ -94,7 +99,7 @@ public class KalmanAgent extends AbstractAgent {
 //        } else if( millisUntilTankInCrosshairs - millisUntilBulletHitsTank < SHOOTING_THRESHOLD )
 //            actions.add(new Action(this, Action.Type.SHOOT, ""));
         if(  intersection_time < 0 || time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
-            actions.add(getTurningAction(environment.getMyState()));
+//            actions.add(getTurningAction(environment.getMyState()));
         } else if( time_to_delay < SHOOTING_THRESHOLD ) {
             actions.add(new Action(this, Action.Type.SHOOT, ""));
         } else {
@@ -107,9 +112,9 @@ public class KalmanAgent extends AbstractAgent {
         double toReturn[] = {-1, -1};
         double bullet_vy = Math.sin(myState.getAngle()) * shot_v;
         double bullet_vx = Math.cos(myState.getAngle()) * shot_v;
-        double c = enemyState.get(0,3) - myState.getY() + (-1*bullet_vy/bullet_vx)*(enemyState.get(0,0)-myState.getX());
-        double b = (-1*bullet_vy/bullet_vx) * (enemyState.get(0,1)-bullet_vx) + enemyState.get(0,4) - bullet_vy;
-        double a = (-1*bullet_vy/bullet_vx) * enemyState.get(0,2) + enemyState.get(0,5);
+        double c = enemyState.get(3,0) - myState.getY() + (-1*bullet_vy/bullet_vx)*(enemyState.get(0,0)-myState.getX());
+        double b = (-1*bullet_vy/bullet_vx) * (enemyState.get(1, 0)-bullet_vx) + enemyState.get(4, 0) - bullet_vy;
+        double a = (-1*bullet_vy/bullet_vx) * enemyState.get(2,0) + enemyState.get(5,0);
         //quadratic formula
         if (b*b - 4 * a * c > 0)
         {
@@ -120,7 +125,7 @@ public class KalmanAgent extends AbstractAgent {
                 return toReturn;
 
             //substitute back in to solve for second variable
-            double delay = ( (enemyState.get(0,0) - myState.getX()) + (time*(enemyState.get(0,1)-bullet_vx)) + (time*time*enemyState.get(0,2)) )/(-1*bullet_vx);
+            double delay = ( (enemyState.get(0,0) - myState.getX()) + (time*(enemyState.get(1,0)-bullet_vx)) + (time*time*enemyState.get(2,0)) )/(-1*bullet_vx);
             if (delay < 0)
                 return toReturn;
 
@@ -142,8 +147,8 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     public Point getEnemyPosition(long millisIntoFuture) {
-        double x = enemyState.get(0,0) + enemyState.get(0,1)*millisIntoFuture + enemyState.get(0,2)*millisIntoFuture*millisIntoFuture;
-        double y = enemyState.get(0,3) + enemyState.get(0,4)*millisIntoFuture + enemyState.get(0,5)*millisIntoFuture*millisIntoFuture;
+        double x = enemyState.get(0,0) + enemyState.get(1,0)*millisIntoFuture + enemyState.get(2,0)*millisIntoFuture*millisIntoFuture;
+        double y = enemyState.get(3,0) + enemyState.get(4,0)*millisIntoFuture + enemyState.get(5,0)*millisIntoFuture*millisIntoFuture;
         return new Point((int)x,(int)y);
     }
 
@@ -190,7 +195,10 @@ public class KalmanAgent extends AbstractAgent {
         Matrix mu_tPlus1 = F.times(enemyState).plus(kSubTPlus1.times(zSubTPlus1.minus(H.times(F).times(enemyState))));
 
         //update variance
-        Matrix sigma_tPlus1 = Jama.Matrix.identity(6, 2).minus(kSubTPlus1.times(H)).times(F.times(sigmaSubT.times(F.transpose())).plus(sigmaSubX));
+        Matrix sigma_tPlus1 = Jama.Matrix.identity(6, 6).minus(kSubTPlus1.times(H)).times(F.times(sigmaSubT.times(F.transpose())).plus(sigmaSubX));
+
+        enemyState = mu_tPlus1;
+        sigmaSubT = sigma_tPlus1;
     }
 
     private boolean tankWasDestroyed(Environment environment) {
