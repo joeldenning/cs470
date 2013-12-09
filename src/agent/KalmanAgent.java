@@ -32,15 +32,13 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private State state = State.SITTING_DUCK;
-    private Matrix enemyState;
-    private Matrix sigmaSubT;
-    private Matrix F;
+    private Matrix enemyState, sigmaSubX, sigmaSubZ, F, H, sigmaSubT;
 
     protected KalmanAgent(int tankIndex) {
         super(tankIndex);
         double[] doubleState = { 0, 0, 0, 0, 0, 0 };
         enemyState = new Matrix(doubleState, 6);
-        double[][] doubleSigmaSubT = {
+        double[][] dSigmaSubX = {
                 {100,   0, 0,  0,   0,   0},
                 {0,   0.1, 0,  0,   0,   0},
                 {0,     0, 0.1,0,   0,   0},
@@ -48,7 +46,7 @@ public class KalmanAgent extends AbstractAgent {
                 {0,     0, 0,  0,   0.1, 0},
                 {0,     0, 0,  0,   0, 0.1},
         };
-        double[][] doubleF = {
+        double[][] dF = {
                 {1,   deltaT,   Math.pow(deltaT, 2)/2,   0,   0,   0},
                 {0,   1,        deltaT               ,   0,   0,   0},
                 {0,   -friction, 1                   ,   0,   0,   0},
@@ -56,8 +54,22 @@ public class KalmanAgent extends AbstractAgent {
                 {0,   0,        0                    ,   0,   1,   deltaT},
                 {0,   0,        0                    ,   0,   -friction,   1}
         };
-        sigmaSubT = new Matrix(doubleSigmaSubT);
-        F = new Matrix(doubleF);
+        double[][] dH = {
+                {1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 1, 0, 0}
+        };
+        double[][] dSigmaSubZ = {
+                {25, 0 },
+                {0 , 25}
+        };
+        double[][] dSigmaSubT = {
+                {}
+        };
+        sigmaSubX = new Matrix(dSigmaSubX);
+        sigmaSubZ = new Matrix(dSigmaSubZ);
+        sigmaSubT = new Matrix(dSigmaSubT);
+        F = new Matrix(dF);
+        H = new Matrix(dH);
     }
 
     @Override
@@ -162,7 +174,23 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private void updateKalmanFilter(Environment environment) {
-        //TODO Joel
+        //update correction
+        Matrix commonExpr = F.times(sigmaSubX).times(F.transpose()).plus(sigmaSubX);
+        Matrix numerator = commonExpr.times(H.transpose());
+        Matrix denominator = H.times(commonExpr).times(H.transpose()).plus(sigmaSubZ);
+        Matrix kSubTPlus1 = numerator.times(denominator.inverse());
+
+        //update mean
+        Tank targetTank = environment.getTeam(teamToDuckMap.get(state)).getTanks().get(0);
+        double[][] dZSubTPlus1 = {
+                {targetTank.getX()},
+                {targetTank.getY()}
+        };
+        Matrix zSubTPlus1 = new Matrix(dZSubTPlus1);
+        Matrix mu_tPlus1 = F.times(enemyState).plus(kSubTPlus1.times(zSubTPlus1.minus(H.times(F).times(enemyState))));
+
+        //update variance
+        Matrix sigma_tPlus1 = Jama.Matrix.identity(6, 2).minus(kSubTPlus1.times(H)).times(F.times(sigmaSubT.times(F.transpose())).plus(sigmaSubX));
     }
 
     private boolean tankWasDestroyed(Environment environment) {
