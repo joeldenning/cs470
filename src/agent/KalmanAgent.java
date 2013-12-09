@@ -94,8 +94,29 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private Action getTurningAction(Tank myState) {
-        //TODO Joel
-        return null;  //To change body of created methods use File | Settings | File Templates.
+        boolean turnClockwise;
+
+	    double otherX = myState.getY() / Math.atan(myState.getAngle());
+	    double otherY = 0;
+
+	    double slope = (myState.getY() - otherY) / (myState.getX() - otherX);
+	    double yIntercept = myState.getY() - slope * myState.getX();
+
+	    double enemyX = enemyState.get(0, 0);
+	    double enemyY = enemyState.get(3, 0);
+
+	    double enemyCalculatedY = slope * enemyX + yIntercept;
+	    if( enemyCalculatedY > enemyY )
+		    turnClockwise = true;
+	    else
+	        turnClockwise = false;
+
+	    Action result;
+	    if( turnClockwise )
+		    result = createAction(Action.Type.ANGVEL, "-1.0");
+	    else
+	        result = createAction(Action.Type.ANGVEL, "1.0");
+        return result;  //To change body of created methods use File | Settings | File Templates.
     }
 
     private void updateKalmanFilter(Environment environment) {
@@ -103,8 +124,7 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private boolean tankWasDestroyed(Environment environment) {
-        //TODO Joel
-        return false;  //To change body of created methods use File | Settings | File Templates.
+        return environment.getTeam(teamToDuckMap.get(state)).getPlayerCount() == 0;
     }
 
     private void changeState() {
