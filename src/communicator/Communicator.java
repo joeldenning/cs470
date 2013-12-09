@@ -340,4 +340,8 @@ public class Communicator {
     public void writeToSocketNoExpectedResponse(String command) {
         out.println(command);
     }
+    
+    public String getColor() {
+    	return color;
+    }
 }

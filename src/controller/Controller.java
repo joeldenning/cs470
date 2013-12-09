@@ -21,20 +21,25 @@ public class Controller extends Thread {
         int numOfAgents = Integer.parseInt(args[3]);
         communicator = new Communicator(args[0], Integer.parseInt(args[1]), args[2]);
         init();
-        GridFilterControllerAgent controllerAgent = null;
-        final int numOfControllerAgents = 1;
-        if (numOfAgents > 0) {
-            GridVisualizationThread gridVisualizationThread = new GridVisualizationThread();
-            gridVisualizationThread.start();
-            for (int i = 0; i < Math.min(numOfControllerAgents, numOfAgents); i++) {
-                controllerAgent = new GridFilterControllerAgent(i, gridVisualizationThread);
-                Controller controller = new Controller(controllerAgent);
-                controller.start();
-            }
-        }
-        for( int i=numOfControllerAgents; i<numOfAgents; i++ ) {
-            Controller controller = new Controller(new GridFilterAgent(i));
-            controller.start();
+        switch (communicator.getColor()) {
+        	case "purple":
+        		Controller sitting = new Controller(new SittingDuckAgent(0));
+                sitting.start();
+                break;
+                
+        	case "green":
+        		Controller linear = new Controller(new LinearAgent(0));
+                linear.start();
+            
+        	case "red":
+        		Controller wild = new Controller(new DumbAgent(0));
+                wild.start();
+        	
+        	case "blue":
+        		Controller shooter = new Controller(new KalmanAgent(0));
+                shooter.start();
+        			
+        
         }
 	}
 
