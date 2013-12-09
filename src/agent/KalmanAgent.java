@@ -34,7 +34,7 @@ public class KalmanAgent extends AbstractAgent {
     private State state = State.SITTING_DUCK;
     private Matrix enemyState, sigmaSubX, sigmaSubZ, F, H, sigmaSubT;
 
-    protected KalmanAgent(int tankIndex) {
+    public KalmanAgent(int tankIndex) {
         super(tankIndex);
         double[] doubleState = { 0, 0, 0, 0, 0, 0 };
         enemyState = new Matrix(doubleState, 6);
