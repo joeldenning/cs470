@@ -52,7 +52,7 @@ public class GridVisualizationThread extends Thread {
         updateKalman();
 	}
 
-    private void updateKalman() {
+    public void updateKalman() {
         while( true ) {
             try {
                 Thread.sleep(500l);
