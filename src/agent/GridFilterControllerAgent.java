@@ -65,7 +65,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     }
 
     private void analyzeForObstacles() {
-        //TODO Brian
+        
     	//This may need to run through twice to catch leftover rectangles
     	
     	//find largest rectangle, algorithm from http://www.drdobbs.com/database/the-maximal-rectangle-problem/184410529
@@ -145,7 +145,7 @@ public class GridFilterControllerAgent extends GridFilterAgent {
     }
     /*
      * private void analyzeForObstacles() {
-        //TODO Brian
+        
     	//This may need to run through twice to catch leftover rectangles
     	
     	//find largest rectangle, algorithm from http://www.drdobbs.com/database/the-maximal-rectangle-problem/184410529
