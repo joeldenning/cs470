@@ -73,7 +73,7 @@ public class Controller extends Thread {
 		}
         agent.processAttemptedActions(resultsOfActions);
         try {
-            Thread.sleep(agent.getNextStateChange());
+            Thread.sleep(Math.max(0, agent.getNextStateChange() - System.currentTimeMillis()));
         } catch (InterruptedException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

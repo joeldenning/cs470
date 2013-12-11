@@ -21,9 +21,9 @@ public class KalmanPanel extends JPanel {
         Point curPosition = kalmanAgent.getEnemyPosition(0);
         curPosition.x = curPosition.x + 400;
         curPosition.y = -curPosition.y + 400;
-	    Color color = new Color(3, 1, 48);
+	    Color color = new Color(3, 100, 200);
 	    g.setColor(color);
-        g.fillRect(curPosition.x, curPosition.y, 2, 2);
+        g.fillRect(curPosition.x, curPosition.y, 4, 4);
 //        System.out.println(curPosition);
         final int timeStep = 200;
         final int iters = 10;
@@ -33,9 +33,9 @@ public class KalmanPanel extends JPanel {
             point.x = point.x + 400;
             point.y = -point.y + 400;
 
-	        color = new Color(color.getRed()+colorStep, color.getGreen()+colorStep, color.getBlue()+colorStep);
+	        color = new Color(color.getRed()+colorStep, color.getGreen(), color.getBlue());
 	        g.setColor(color);
-	        g.fillRect(point.x, point.y, 2, 2);
+	        g.fillRect(point.x, point.y, 4, 4);
 //            System.out.println(point);
         }
         System.out.println("\n");

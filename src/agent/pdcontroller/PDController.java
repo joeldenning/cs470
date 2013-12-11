@@ -58,7 +58,7 @@ public class PDController {
 		return new Action(agent, Action.Type.ANGVEL, Double.toString(newAngVel));
 	}
 
-	private double getClosestAngleDiff(double desired, double current) {
+	public static double getClosestAngleDiff(double desired, double current) {
 		//We will pretend our current angle is 0 and normalize the desired angle to match this.
 		double normalizedDesired = desired-current;
 		//Account for -pi to pi range

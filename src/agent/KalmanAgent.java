@@ -2,6 +2,7 @@ package agent;
 
 import Jama.Matrix;
 import agent.gridvisualization.GridVisualizationThread;
+import agent.pdcontroller.PDController;
 import environment.*;
 
 import java.awt.*;
@@ -19,10 +20,10 @@ public class KalmanAgent extends AbstractAgent {
 
     private static final long SHOOTING_THRESHOLD = 100;
     private static Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
-    private static final double deltaT = .5;
+    private static final double deltaT = .1;
     private static final double friction = 0;
     private static Map<State, String> teamToDuckMap = new HashMap<State, String>();
-    private static final long WAITING_FOR_PERFECT_SHOT_MAX_TIME = 1000;
+    private static final double WAITING_FOR_PERFECT_SHOT_MAX_TIME = 15;
     private static final double shot_v = 100;
 
     static {
@@ -40,7 +41,7 @@ public class KalmanAgent extends AbstractAgent {
 
     public KalmanAgent(int tankIndex) {
         super(tankIndex);
-        final double position = 100, velocity = 100, acceleration = 100;
+        final double position = 50, velocity = 100, acceleration = 100;
         double[][] dSigmaSubT = {
                 {position,   0, 0,  0,   0,   0},
                 {0,   velocity, 0,  0,   0,   0},
@@ -113,7 +114,7 @@ public class KalmanAgent extends AbstractAgent {
 //        } else if( millisUntilTankInCrosshairs - millisUntilBulletHitsTank < SHOOTING_THRESHOLD )
 //            actions.add(new Action(this, Action.Type.SHOOT, ""));
         if(  intersection_time < 0 || time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
-//            actions.add(getTurningAction(environment.getMyState()));
+            actions.add(getTurningAction(environment.getMyState()));
         } else if( time_to_delay < SHOOTING_THRESHOLD ) {
             actions.add(new Action(this, Action.Type.SHOOT, ""));
         } else {
@@ -133,6 +134,7 @@ public class KalmanAgent extends AbstractAgent {
         double c = enemyState.get(3,0) - myState.getY() + (-1*bullet_vy/bullet_vx)*(enemyState.get(0,0)-myState.getX());
         double b = (-1*bullet_vy/bullet_vx) * (enemyState.get(1, 0)-bullet_vx) + enemyState.get(4, 0) - bullet_vy;
         double a = (-1*bullet_vy/bullet_vx) * enemyState.get(2,0) + enemyState.get(5,0);
+        a = a == 0 ? 1 : a;
         //quadratic formula
         if (b*b - 4 * a * c > 0)
         {
@@ -176,29 +178,47 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private Action getTurningAction(Tank myState) {
-        boolean turnClockwise;
+//        boolean turnClockwise;
+//
+//        double myAngle = myState.getAngle() < 0 ? myState.getAngle() + Math.PI : myState.getAngle();
+//
+//        boolean ourPositionIsLeftOfYAxis = myState.getX() < 0;
+//
+//        double otherX;
+//        if( ourPositionIsLeftOfYAxis )
+//    	    otherX = myState.getX() - (myState.getY() / Math.tan(myAngle));
+//        else
+//            otherX = myState.getX() + (myState.getY() / Math.tan(myAngle));
+//
+//	    double otherY = 0;
+//
+//	    double slope = (myState.getY() - otherY) / (myState.getX() - otherX);
+//	    double yIntercept = myState.getY() - slope * myState.getX();
+//
+//	    double enemyX = enemyState.get(0, 0);
+//	    double enemyY = enemyState.get(3, 0);
+//
+//	    double enemyCalculatedY = slope * enemyX + yIntercept;
+//	    if( enemyCalculatedY > enemyY )
+//		    turnClockwise = true;
+//	    else
+//	        turnClockwise = false;
+//
+//        if( myState.getAngle() < 0 ) {
+//            turnClockwise = !turnClockwise;
+//        }
+//
+//	    Action result;
+//	    if( turnClockwise )
+//		    result = createAction(Action.Type.ANGVEL, "-1.0");
+//	    else
+//	        result = createAction(Action.Type.ANGVEL, "1.0");
+//        return result;  //To change body of created methods use File | Settings | File Templates.
 
-	    double otherX = myState.getY() / Math.atan(myState.getAngle());
-	    double otherY = 0;
-
-	    double slope = (myState.getY() - otherY) / (myState.getX() - otherX);
-	    double yIntercept = myState.getY() - slope * myState.getX();
-
-	    double enemyX = enemyState.get(0, 0);
-	    double enemyY = enemyState.get(3, 0);
-
-	    double enemyCalculatedY = slope * enemyX + yIntercept;
-	    if( enemyCalculatedY > enemyY )
-		    turnClockwise = true;
-	    else
-	        turnClockwise = false;
-
-	    Action result;
-	    if( turnClockwise )
-		    result = createAction(Action.Type.ANGVEL, "-1.0");
-	    else
-	        result = createAction(Action.Type.ANGVEL, "1.0");
-        return result;  //To change body of created methods use File | Settings | File Templates.
+        double desiredAngle = Math.atan2(enemyState.get(1,0)-myState.getY(), enemyState.get(0,0)-myState.getX());
+        double desiredAngVel = PDController.getClosestAngleDiff(desiredAngle, myState.getAngle());
+        desiredAngVel = desiredAngVel < 0 ? -0.5 : 0.5;
+        return createAction(Action.Type.ANGVEL, Double.toString(desiredAngVel));
     }
 
     private void updateKalmanFilter(Environment environment) {
@@ -241,7 +261,7 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private boolean tankWasDestroyed(Environment environment) {
-        return environment.getTeam(teamToDuckMap.get(state)).getPlayerCount() == 0;
+        return environment.getTeam(teamToDuckMap.get(state)).getTanks().get(0).getStatus() == Tank.Status.dead;
     }
 
     private void changeState() {
@@ -268,7 +288,7 @@ public class KalmanAgent extends AbstractAgent {
 
     @Override
     public long getNextStateChange() {
-        return (long)(deltaT*1000);
+        return (long)(deltaT*1000) + System.currentTimeMillis();
     }
 
     private enum State {
