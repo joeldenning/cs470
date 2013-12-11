@@ -30,15 +30,15 @@ public class Controller extends Thread {
         	case "green":
         		Controller linear = new Controller(new LinearAgent(0));
                 linear.start();
-            
+                break;
         	case "red":
         		Controller wild = new Controller(new DumbAgent(0));
                 wild.start();
-        	
+        	    break;
         	case "blue":
         		Controller shooter = new Controller(new KalmanAgent(0));
                 shooter.start();
-        			
+        		break;
         
         }
 	}
@@ -71,7 +71,7 @@ public class Controller extends Thread {
 		}
         agent.processAttemptedActions(resultsOfActions);
         try {
-            Thread.sleep(Math.max(0, agent.getNextStateChange() - System.currentTimeMillis()));
+            Thread.sleep(agent.getNextStateChange());
         } catch (InterruptedException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

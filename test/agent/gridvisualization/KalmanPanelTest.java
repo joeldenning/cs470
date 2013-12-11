@@ -19,6 +19,8 @@ public class KalmanPanelTest {
 		GridVisualizationThread thread = new GridVisualizationThread();
 		thread.setKalmanAgent(new MockKalmanAgent(1));
 		thread.start();
-		thread.updateKalman();
+        while( true )
+    		thread.updateKalman();
+
 	}
 }
