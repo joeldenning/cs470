@@ -19,16 +19,26 @@ public class KalmanPanel extends JPanel {
         super.paintComponent(g);    //To change body of overridden methods use File | Settings | File Templates.
 
         Point curPosition = kalmanAgent.getEnemyPosition(0);
+        curPosition.x = curPosition.x + 400;
+        curPosition.y = -curPosition.y + 400;
 	    Color color = new Color(3, 1, 48);
 	    g.setColor(color);
         g.fillRect(curPosition.x, curPosition.y, 2, 2);
+//        System.out.println(curPosition);
+        final int timeStep = 200;
+        final int iters = 10;
+        final int colorStep = 20;
+        for( int iter = 1; iter <= iters; iter++ ) {
+            Point point = kalmanAgent.getEnemyPosition(iter * timeStep);
+            point.x = point.x + 400;
+            point.y = -point.y + 400;
 
-        for( int millis=100; millis<500; millis = millis+100 ) {
-            Point point = kalmanAgent.getEnemyPosition(millis);
-	        color = new Color(color.getRed()+40, color.getGreen()+40, color.getBlue()+40);
+	        color = new Color(color.getRed()+colorStep, color.getGreen()+colorStep, color.getBlue()+colorStep);
 	        g.setColor(color);
 	        g.fillRect(point.x, point.y, 2, 2);
+//            System.out.println(point);
         }
+        System.out.println("\n");
     }
 
 }

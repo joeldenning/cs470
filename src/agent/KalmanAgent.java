@@ -1,6 +1,7 @@
 package agent;
 
 import Jama.Matrix;
+import agent.gridvisualization.GridVisualizationThread;
 import environment.*;
 
 import java.awt.*;
@@ -18,8 +19,8 @@ public class KalmanAgent extends AbstractAgent {
 
     private static final long SHOOTING_THRESHOLD = 100;
     private static Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
-    private static final double deltaT = .1;
-    private static final double friction = 0.1;
+    private static final double deltaT = .5;
+    private static final double friction = 0;
     private static Map<State, String> teamToDuckMap = new HashMap<State, String>();
     private static final long WAITING_FOR_PERFECT_SHOT_MAX_TIME = 1000;
     private static final double shot_v = 100;
@@ -31,20 +32,22 @@ public class KalmanAgent extends AbstractAgent {
         teamToDuckMap.put(State.WILD, "red");
     }
 
+    private final GridVisualizationThread visualization;
+
     private State state = State.SITTING_DUCK;
     private Matrix enemyState, sigmaSubX, sigmaSubZ, F, H, sigmaSubT;
+    private int iteration;
 
     public KalmanAgent(int tankIndex) {
         super(tankIndex);
-        double[] doubleState = { 0, 0, 0, 0, 0, 0 };
-        enemyState = new Matrix(doubleState, 6);
+        final double position = 100, velocity = 100, acceleration = 100;
         double[][] dSigmaSubT = {
-                {100,   0, 0,  0,   0,   0},
-                {0,   0.1, 0,  0,   0,   0},
-                {0,     0, 0.1,0,   0,   0},
-                {0,     0, 0,  100, 0,   0},
-                {0,     0, 0,  0,   0.1, 0},
-                {0,     0, 0,  0,   0, 0.1},
+                {position,   0, 0,  0,   0,   0},
+                {0,   velocity, 0,  0,   0,   0},
+                {0,     0, acceleration,0,   0,   0},
+                {0,     0, 0,  position, 0,   0},
+                {0,     0, 0,  0,   velocity, 0},
+                {0,     0, 0,  0,   0, acceleration},
         };
         double[][] dF = {
                 {1,   deltaT,   Math.pow(deltaT, 2)/2,   0,   0,   0},
@@ -63,22 +66,33 @@ public class KalmanAgent extends AbstractAgent {
                 {0 , 25}
         };
         double[][] dSigmaSubX = {
-                {0.1,   0, 0,  0,   0,   0},
-                {0,   0.1, 0,  0,   0,   0},
-                {0,     0, 100,0,   0,   0},
-                {0,     0, 0,  0.1, 0,   0},
-                {0,     0, 0,  0,   0.1, 0},
-                {0,     0, 0,  0,   0, 100},
+                {position,   0, 0,  0,   0,   0},
+                {0,   velocity, 0,  0,   0,   0},
+                {0,     0, acceleration,0,   0,   0},
+                {0,     0, 0,  position, 0,   0},
+                {0,     0, 0,  0,   velocity, 0},
+                {0,     0, 0,  0,   0, acceleration},
         };
         sigmaSubX = new Matrix(dSigmaSubX);
         sigmaSubZ = new Matrix(dSigmaSubZ);
         sigmaSubT = new Matrix(dSigmaSubT);
         F = new Matrix(dF);
         H = new Matrix(dH);
+
+        visualization = new GridVisualizationThread();
+        visualization.setKalmanAgent(this);
+        visualization.start();
     }
 
     @Override
     public List<Action> getActions(Environment environment) {
+
+        if( enemyState == null ) {
+            Tank enemyTank = environment.getTeam(teamToDuckMap.get(state)).getTanks().get(0);
+            double[] dEnemyState = { enemyTank.getX(), 0, 0, enemyTank.getY(), 0, 0 };
+            enemyState = new Matrix(dEnemyState, 6);
+        }
+
         if( state == State.DONE )
             return new ArrayList<Action>();
         if( tankWasDestroyed(environment) ) {
@@ -104,6 +118,10 @@ public class KalmanAgent extends AbstractAgent {
             actions.add(new Action(this, Action.Type.SHOOT, ""));
         } else {
             actions.add(new Action(this, Action.Type.ANGVEL, "0"));
+        }
+        if( ++iteration % 1 == 0 ) {
+            visualization.updateKalman();
+            iteration = 0;
         }
         return actions;
     }
@@ -148,9 +166,12 @@ public class KalmanAgent extends AbstractAgent {
         return 0;  //To change body of created methods use File | Settings | File Templates.
     }
 
-    public Point getEnemyPosition(long millisIntoFuture) {
-        double x = enemyState.get(0,0) + enemyState.get(1,0)*millisIntoFuture + enemyState.get(2,0)*millisIntoFuture*millisIntoFuture;
-        double y = enemyState.get(3,0) + enemyState.get(4,0)*millisIntoFuture + enemyState.get(5,0)*millisIntoFuture*millisIntoFuture;
+    public synchronized Point getEnemyPosition(long millisIntoFuture) {
+        if( enemyState == null )
+            return new Point(0, 0);
+        double secondsIntoTheFuture = (double)millisIntoFuture / 1000d;
+        double x = enemyState.get(0,0) + enemyState.get(1,0)*secondsIntoTheFuture + enemyState.get(2,0)*secondsIntoTheFuture*secondsIntoTheFuture;
+        double y = enemyState.get(3,0) + enemyState.get(4,0)*secondsIntoTheFuture + enemyState.get(5,0)*secondsIntoTheFuture*secondsIntoTheFuture;
         return new Point((int)x,(int)y);
     }
 
@@ -182,7 +203,7 @@ public class KalmanAgent extends AbstractAgent {
 
     private void updateKalmanFilter(Environment environment) {
         //update correction
-        Matrix commonExpr = F.times(sigmaSubX).times(F.transpose()).plus(sigmaSubX);
+        Matrix commonExpr = F.times(sigmaSubT).times(F.transpose()).plus(sigmaSubX);
         Matrix numerator = commonExpr.times(H.transpose());
         Matrix denominator = H.times(commonExpr).times(H.transpose()).plus(sigmaSubZ);
         Matrix kSubTPlus1 = numerator.times(denominator.inverse());
@@ -194,13 +215,29 @@ public class KalmanAgent extends AbstractAgent {
                 {targetTank.getY()}
         };
         Matrix zSubTPlus1 = new Matrix(dZSubTPlus1);
-        Matrix mu_tPlus1 = F.times(enemyState).plus(kSubTPlus1.times(zSubTPlus1.minus(H.times(F).times(enemyState))));
+        Matrix mu_tPlus1 = F.times(enemyState);
+        Matrix changeInObservation = zSubTPlus1.minus(H.times(F).times(enemyState));
+
+//        System.out.println(Arrays.deepToString(F.times(enemyState).getArray()));
+
+
+//        double[][] toPrint = kSubTPlus1.getArray();
+
+//        for (int i =0; i < toPrint.length; i++) {
+//            System.out.printf("%5f\t%f\n", toPrint[i][0], toPrint[i][1]);
+//        }
+
+
+        mu_tPlus1 = mu_tPlus1.plus(kSubTPlus1.times(changeInObservation));
 
         //update variance
-        Matrix sigma_tPlus1 = Jama.Matrix.identity(6, 6).minus(kSubTPlus1.times(H)).times(F.times(sigmaSubT.times(F.transpose())).plus(sigmaSubX));
+        Matrix sigma_tPlus1 = Jama.Matrix.identity(6, 6).minus(kSubTPlus1.times(H)).times(commonExpr);
 
         enemyState = mu_tPlus1;
         sigmaSubT = sigma_tPlus1;
+
+//        System.out.println(Arrays.deepToString(enemyState.getArray()));
+//        System.out.println();
     }
 
     private boolean tankWasDestroyed(Environment environment) {

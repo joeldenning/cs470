@@ -48,19 +48,10 @@ public class GridVisualizationThread extends Thread {
 		frame.getContentPane().add(kalmanPanel);
 
 		frame.setVisible(true);
-
-        updateKalman();
 	}
 
     public void updateKalman() {
-        while( true ) {
-            try {
-                Thread.sleep(500l);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
-            frame.repaint();
-        }
+        frame.repaint();
     }
 
     public synchronized void update(double[][] grid, Set<Rect> obstacles) {
