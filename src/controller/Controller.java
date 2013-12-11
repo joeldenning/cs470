@@ -15,7 +15,7 @@ import java.util.List;
 public class Controller extends Thread {
 
 	private static Communicator communicator;
-	private AbstractAgent agent;
+	private static AbstractAgent agent;
 
 	public static void main(String[] args) throws FileNotFoundException {
         int numOfAgents = Integer.parseInt(args[3]);
@@ -23,17 +23,19 @@ public class Controller extends Thread {
         init();
         switch (communicator.getColor()) {
         	case "purple":
-        		Controller sitting = new Controller(new SittingDuckAgent(0));
+        		Controller sitting = new Controller(new LinearAgent(0));
                 sitting.start();
                 break;
                 
         	case "green":
         		Controller linear = new Controller(new LinearAgent(0));
                 linear.start();
+                break;
             
         	case "red":
         		Controller wild = new Controller(new DumbAgent(0));
                 wild.start();
+                break;
         	
         	case "blue":
         		Controller shooter = new Controller(new KalmanAgent(0));

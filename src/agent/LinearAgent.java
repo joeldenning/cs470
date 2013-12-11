@@ -1,3 +1,4 @@
+
 package agent;
 
 import environment.AttemptedAction;
@@ -8,7 +9,7 @@ import java.util.*;
 
 public class LinearAgent extends AbstractAgent {
 
-    private static final int MOVE_DURATION = 800;
+    private static final int MOVE_DURATION = 20000;
 
     private long nextStateChange;
     private State state;
@@ -35,9 +36,11 @@ public class LinearAgent extends AbstractAgent {
             switch (state) {
                 case MOVING_FORWARD:
                     actions.add(createAction(Action.Type.SPEED, "1"));
+                    state = State.MOVING_BACKWARD;
                     break;
                 case MOVING_BACKWARD:
                     actions.add(createAction(Action.Type.SPEED, "-1"));
+                    state = State.MOVING_FORWARD;
                     break;
             }
         }

@@ -120,13 +120,15 @@ public class KalmanAgent extends AbstractAgent {
         {
             double res1 = (-1*b + Math.sqrt(b*b - 4 * a * c))/(2*a);
             double res2 = (-1*b - Math.sqrt(b*b - 4 * a * c))/(2*a);
+            if (res1 > 0 && res2 > 0) {
+            	int stop = 0;}
             double time = Math.max(res1,res2);
             if (time < 0)
                 return toReturn;
 
             //substitute back in to solve for second variable
             double delay = ( (enemyState.get(0,0) - myState.getX()) + (time*(enemyState.get(1,0)-bullet_vx)) + (time*time*enemyState.get(2,0)) )/(-1*bullet_vx);
-            if (delay < 0)
+            if (delay < 0 || delay > time)
                 return toReturn;
 
             toReturn[0] = delay;
