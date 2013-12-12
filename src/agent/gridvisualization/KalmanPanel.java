@@ -41,6 +41,7 @@ public class KalmanPanel extends JPanel {
 
         Point bulletIntersection = kalmanAgent.getBulletIntersection();
         bulletIntersection.x += 400;
+        bulletIntersection.y *= -1;
         bulletIntersection.y += 400;
         if( bulletIntersection.x >= 0 && bulletIntersection.y >= 0 ) {
             g.setColor(Color.GREEN);

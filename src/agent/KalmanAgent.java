@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class KalmanAgent extends AbstractAgent {
 
-    private static final long SHOOTING_THRESHOLD = 30;
+    private static final double SHOOTING_THRESHOLD = 3;
     private static Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
     private static final double deltaT = .1;
     private static final double friction = 0;
@@ -120,7 +120,9 @@ public class KalmanAgent extends AbstractAgent {
 //        } else if( millisUntilTankInCrosshairs - millisUntilBulletHitsTank < SHOOTING_THRESHOLD )
 //            actions.add(new Action(this, Action.Type.SHOOT, ""));
         actions.add(getTurningAction(environment.getMyState()));
-        if( intersection_time >= 0 && intersection_time <= WAITING_FOR_PERFECT_SHOT_MAX_TIME && time_to_delay < SHOOTING_THRESHOLD ) {
+//        System.out.println("time to delay = "+time_to_delay);
+//        System.out.println(inte);
+        if( intersection_time >= 0 && time_to_delay < SHOOTING_THRESHOLD ) {
             actions.add(new Action(this, Action.Type.SHOOT, ""));
         }
         if( ++iteration % 1 == 0 ) {
@@ -144,8 +146,6 @@ public class KalmanAgent extends AbstractAgent {
         {
             double res1 = (-1*b + Math.sqrt(b*b - 4 * a * c))/(2*a);
             double res2 = (-1*b - Math.sqrt(b*b - 4 * a * c))/(2*a);
-            if (res1 > 0 && res2 > 0) {
-            	int stop = 0;}
             double time = Math.max(res1,res2);
             if (time < 0)
                 return toReturn;
@@ -160,6 +160,7 @@ public class KalmanAgent extends AbstractAgent {
 
             bulletIntersection.x = (int)(myState.getX() + bullet_vx * (time - delay));
             bulletIntersection.y = (int)(myState.getY() + bullet_vy * (time - delay));
+//            System.out.println(bulletIntersection);
 
         }
 
@@ -190,7 +191,7 @@ public class KalmanAgent extends AbstractAgent {
     private Action getTurningAction(Tank myState) {
         double distance = Math.sqrt(Math.pow(myState.getX() - enemyState.get(0, 0), 2d) + Math.pow(myState.getY() - enemyState.get(3, 0), 2d));
 
-        double intoFuture = ( distance / 800d ) * 8000d;
+        double intoFuture = ( distance / 800d ) * 7000d;
         pointTurningTowards = this.getEnemyPosition((long)intoFuture);
         ourPosition = new Point((int)myState.getX(), (int)myState.getY());
 //        System.out.println(pointTurningTowards);
@@ -201,9 +202,11 @@ public class KalmanAgent extends AbstractAgent {
 //        System.out.println("weight = "+weight);
         desiredAngVel = desiredAngVel < 0 ? -.8 : .8;
 //        desiredAngVel *= weight;
+        Random rand = new Random();
+        if( Math.abs(desiredAngle - myState.getAngle()) < .5 ) {
+            desiredAngVel = desiredAngVel - desiredAngVel / ((double)(2 + rand.nextInt(2)));
+        }
         desiredAngVel = Math.min(1, Math.max(-1, desiredAngVel));
-        if( Math.abs(desiredAngVel) < .3 )
-            desiredAngVel = desiredAngVel < 0 ? desiredAngVel - .5 : desiredAngVel + .5;
 //        System.out.println("angvel = "+desiredAngVel);
         return createAction(Action.Type.ANGVEL, Double.toString(desiredAngVel));
     }
