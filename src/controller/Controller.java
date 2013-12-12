@@ -23,7 +23,7 @@ public class Controller extends Thread {
         init();
         switch (communicator.getColor()) {
         	case "purple":
-        		Controller sitting = new Controller(new LinearAgent(0));
+        		Controller sitting = new Controller(new SittingDuckAgent(0));
                 sitting.start();
                 break;
                 

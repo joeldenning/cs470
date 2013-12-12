@@ -18,12 +18,12 @@ import java.util.List;
  */
 public class KalmanAgent extends AbstractAgent {
 
-    private static final long SHOOTING_THRESHOLD = 100;
+    private static final long SHOOTING_THRESHOLD = 30;
     private static Map<Environment.Component, Collection<String>> desiredEnvironment = new HashMap<Environment.Component, Collection<String>>();
     private static final double deltaT = .1;
     private static final double friction = 0;
     private static Map<State, String> teamToDuckMap = new HashMap<State, String>();
-    private static final double WAITING_FOR_PERFECT_SHOT_MAX_TIME = 15;
+    private static final double WAITING_FOR_PERFECT_SHOT_MAX_TIME = 10;
     private static final double shot_v = 100;
 
     static {
@@ -38,10 +38,20 @@ public class KalmanAgent extends AbstractAgent {
     private State state = State.SITTING_DUCK;
     private Matrix enemyState, sigmaSubX, sigmaSubZ, F, H, sigmaSubT;
     private int iteration;
+    private Point bulletIntersection = new Point(-401, -401), pointTurningTowards = new Point(-401, -401);
+    private Point ourPosition = new Point(-401, -401);
 
     public KalmanAgent(int tankIndex) {
         super(tankIndex);
-        final double position = 50, velocity = 100, acceleration = 100;
+        resetKalmanFilter();
+
+        visualization = new GridVisualizationThread();
+        visualization.setKalmanAgent(this);
+        visualization.start();
+    }
+
+    private void resetKalmanFilter() {
+        final double position = 1, velocity = .1, acceleration = .05;
         double[][] dSigmaSubT = {
                 {position,   0, 0,  0,   0,   0},
                 {0,   velocity, 0,  0,   0,   0},
@@ -51,7 +61,7 @@ public class KalmanAgent extends AbstractAgent {
                 {0,     0, 0,  0,   0, acceleration},
         };
         double[][] dF = {
-                {1,   deltaT,   Math.pow(deltaT, 2)/2,   0,   0,   0},
+                {1,   deltaT,   Math.pow(deltaT, 2)/2d,   0,   0,   0},
                 {0,   1,        deltaT               ,   0,   0,   0},
                 {0,   -friction, 1                   ,   0,   0,   0},
                 {0,   0,        0                    ,   1,deltaT, Math.pow(deltaT, 2)/2},
@@ -63,8 +73,8 @@ public class KalmanAgent extends AbstractAgent {
                 {0, 0, 0, 1, 0, 0}
         };
         double[][] dSigmaSubZ = {
-                {25, 0 },
-                {0 , 25}
+                {200, 0 },
+                {0 , 200}
         };
         double[][] dSigmaSubX = {
                 {position,   0, 0,  0,   0,   0},
@@ -79,10 +89,6 @@ public class KalmanAgent extends AbstractAgent {
         sigmaSubT = new Matrix(dSigmaSubT);
         F = new Matrix(dF);
         H = new Matrix(dH);
-
-        visualization = new GridVisualizationThread();
-        visualization.setKalmanAgent(this);
-        visualization.start();
     }
 
     @Override
@@ -113,12 +119,9 @@ public class KalmanAgent extends AbstractAgent {
 //            actions.add(getTurningAction(environment.getMyState()));
 //        } else if( millisUntilTankInCrosshairs - millisUntilBulletHitsTank < SHOOTING_THRESHOLD )
 //            actions.add(new Action(this, Action.Type.SHOOT, ""));
-        if(  intersection_time < 0 || time_to_delay > WAITING_FOR_PERFECT_SHOT_MAX_TIME )  {
-            actions.add(getTurningAction(environment.getMyState()));
-        } else if( time_to_delay < SHOOTING_THRESHOLD ) {
+        actions.add(getTurningAction(environment.getMyState()));
+        if( intersection_time >= 0 && intersection_time <= WAITING_FOR_PERFECT_SHOT_MAX_TIME && time_to_delay < SHOOTING_THRESHOLD ) {
             actions.add(new Action(this, Action.Type.SHOOT, ""));
-        } else {
-            actions.add(new Action(this, Action.Type.ANGVEL, "0"));
         }
         if( ++iteration % 1 == 0 ) {
             visualization.updateKalman();
@@ -128,6 +131,7 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private double[] calculateIntersection(Tank myState) {
+        bulletIntersection = new Point(-401, -401);
         double toReturn[] = {-1, -1};
         double bullet_vy = Math.sin(myState.getAngle()) * shot_v;
         double bullet_vx = Math.cos(myState.getAngle()) * shot_v;
@@ -153,7 +157,13 @@ public class KalmanAgent extends AbstractAgent {
 
             toReturn[0] = delay;
             toReturn[1] = time;
+
+            bulletIntersection.x = (int)(myState.getX() + bullet_vx * (time - delay));
+            bulletIntersection.y = (int)(myState.getY() + bullet_vy * (time - delay));
+
         }
+
+
 
         return toReturn;
     }
@@ -178,46 +188,23 @@ public class KalmanAgent extends AbstractAgent {
     }
 
     private Action getTurningAction(Tank myState) {
-//        boolean turnClockwise;
-//
-//        double myAngle = myState.getAngle() < 0 ? myState.getAngle() + Math.PI : myState.getAngle();
-//
-//        boolean ourPositionIsLeftOfYAxis = myState.getX() < 0;
-//
-//        double otherX;
-//        if( ourPositionIsLeftOfYAxis )
-//    	    otherX = myState.getX() - (myState.getY() / Math.tan(myAngle));
-//        else
-//            otherX = myState.getX() + (myState.getY() / Math.tan(myAngle));
-//
-//	    double otherY = 0;
-//
-//	    double slope = (myState.getY() - otherY) / (myState.getX() - otherX);
-//	    double yIntercept = myState.getY() - slope * myState.getX();
-//
-//	    double enemyX = enemyState.get(0, 0);
-//	    double enemyY = enemyState.get(3, 0);
-//
-//	    double enemyCalculatedY = slope * enemyX + yIntercept;
-//	    if( enemyCalculatedY > enemyY )
-//		    turnClockwise = true;
-//	    else
-//	        turnClockwise = false;
-//
-//        if( myState.getAngle() < 0 ) {
-//            turnClockwise = !turnClockwise;
-//        }
-//
-//	    Action result;
-//	    if( turnClockwise )
-//		    result = createAction(Action.Type.ANGVEL, "-1.0");
-//	    else
-//	        result = createAction(Action.Type.ANGVEL, "1.0");
-//        return result;  //To change body of created methods use File | Settings | File Templates.
+        double distance = Math.sqrt(Math.pow(myState.getX() - enemyState.get(0, 0), 2d) + Math.pow(myState.getY() - enemyState.get(3, 0), 2d));
 
-        double desiredAngle = Math.atan2(enemyState.get(1,0)-myState.getY(), enemyState.get(0,0)-myState.getX());
+        double intoFuture = ( distance / 800d ) * 8000d;
+        pointTurningTowards = this.getEnemyPosition((long)intoFuture);
+        ourPosition = new Point((int)myState.getX(), (int)myState.getY());
+//        System.out.println(pointTurningTowards);
+        double desiredAngle = Math.atan2((double)pointTurningTowards.y - myState.getY(), (double)pointTurningTowards.x - myState.getX());
+//        System.out.println(desiredAngle);
         double desiredAngVel = PDController.getClosestAngleDiff(desiredAngle, myState.getAngle());
-        desiredAngVel = desiredAngVel < 0 ? -0.5 : 0.5;
+//        double weight = 10 * (Math.abs( desiredAngle - myState.getAngle() ) / Math.PI);
+//        System.out.println("weight = "+weight);
+        desiredAngVel = desiredAngVel < 0 ? -.8 : .8;
+//        desiredAngVel *= weight;
+        desiredAngVel = Math.min(1, Math.max(-1, desiredAngVel));
+        if( Math.abs(desiredAngVel) < .3 )
+            desiredAngVel = desiredAngVel < 0 ? desiredAngVel - .5 : desiredAngVel + .5;
+//        System.out.println("angvel = "+desiredAngVel);
         return createAction(Action.Type.ANGVEL, Double.toString(desiredAngVel));
     }
 
@@ -273,9 +260,10 @@ public class KalmanAgent extends AbstractAgent {
                 state = State.WILD;
                 break;
             case WILD:
-                state = State.DONE;
+                state = State.SITTING_DUCK;
                 break;
         }
+        resetKalmanFilter();
     }
 
     @Override
@@ -289,6 +277,18 @@ public class KalmanAgent extends AbstractAgent {
     @Override
     public long getNextStateChange() {
         return (long)(deltaT*1000) + System.currentTimeMillis();
+    }
+
+    public Point getBulletIntersection() {
+        return bulletIntersection;
+    }
+
+    public Point getPointTurningTowards() {
+        return pointTurningTowards;
+    }
+
+    public Point getMyPosition() {
+        return ourPosition;
     }
 
     private enum State {
